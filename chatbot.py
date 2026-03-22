@@ -73,13 +73,12 @@ def get_vectorstore(api_key, pdf_path):
 def generate_answer(api_key, vectorstore, query):
     # 필요한 라이브러리를 함수 안에서 확실히 임포트
     from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
-
     llm = ChatGoogleGenerativeAI(
         model="gemini-1.5-flash-latest", 
-        google_api_key=api_key,  # 아까 추가한 부분
+        google_api_key=api_key,
         temperature=0,
-        # 에러가 났던 safety_settings 부분을 아래 형식으로 정확히 수정
         safety_settings={
+            # 문자열이 아니라 이 '객체' 자체를 키로 써야 합니다.
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
             HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
             HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
