@@ -63,7 +63,7 @@ def generate_answer(api_key, vectorstore, query):
     from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
     
     llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash-latest",
+        model="gemini-1.5-flash",
         google_api_key=api_key,
         version="v1", # 지난번에 추가한 이 줄은 꼭 유지하세요!
         temperature=0,
