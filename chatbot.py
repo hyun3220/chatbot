@@ -63,7 +63,7 @@ def generate_answer(api_key, vectorstore, query):
     from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
     
     llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash", 
+        model="models/gemini-1.5-flash",
         google_api_key=api_key,
         temperature=0,
         safety_settings={
