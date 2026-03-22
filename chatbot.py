@@ -6,10 +6,9 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.embeddings import HuggingFaceEmbeddings
-
-# [2026년 최신 구조] langchain 패키지를 거치지 않고 직접 라이브러리에서 호출
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains.retrieval import create_retrieval_chain
+# [핵심] 에러 나는 chains 대신 사용하는 최신 모듈
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
 
 # 1. 페이지 설정
 st.set_page_config(page_title="클립리포트 AI 챗봇", page_icon="🤖")
@@ -21,49 +20,45 @@ except KeyError:
     st.error("서버에 API 키가 설정되지 않았습니다. 관리자에게 문의하세요.")
     st.stop()
 
-# 3. 문서 학습 로직 (캐싱 처리)
+# 3. 문서 학습 로직
 @st.cache_resource
 def get_vectorstore(api_key, pdf_path):
     os.environ["GOOGLE_API_KEY"] = api_key
     embeddings = HuggingFaceEmbeddings(model_name="jhgan/ko-sroberta-multitask")
-
-    # [수정] 웹 크롤링 시 차단 방지를 위한 User-Agent 설정
-    import langchain_community.document_loaders.web_base
+    
+    # 웹 크롤링 차단 방지
     os.environ["USER_AGENT"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
-    # 1단계: PDF 로드
     if not os.path.exists(pdf_path):
         st.error(f"에러: '{pdf_path}' 파일이 존재하지 않습니다.")
         st.stop()
-    
+        
+    # PDF 및 웹 데이터 로드
     pdf_loader = PyPDFLoader(pdf_path) 
     pdf_docs = pdf_loader.load()
     
-    # 2단계: 웹 API 문서 로드
     api_url = "https://technet.hancomins.com/board/api/R5/symbols/ReportView.html"
     web_loader = WebBaseLoader(api_url)
     web_docs = web_loader.load()
     
     all_docs = pdf_docs + web_docs
     
-    # 3단계: 텍스트 분할
+    # 텍스트 분할
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=100)
-    splits = text_splitter.split_documents(all_docs) # 여기서 'splits'라는 이름으로 저장됨
+    splits = text_splitter.split_documents(all_docs)
     
-    # 4단계: [중요 수정] 'splits' 변수를 사용하여 빈 내용 필터링
-    # 아까 에러가 났던 부분: 'documents'가 아니라 'splits'를 참조해야 합니다.
+    # 빈 문서 제거
     valid_documents = [doc for doc in splits if doc.page_content and doc.page_content.strip()]
     
-    # 5단계: 벡터 저장소 생성 (메모리 모드로 설정하여 DB 버전 충돌 방지)
-    # persist_directory를 사용하면 서버 환경에 따라 에러가 날 수 있으므로 None 권장
+    # 벡터 저장소 생성 (메모리 모드)
     vectorstore = Chroma.from_documents(
         documents=valid_documents, 
         embedding=embeddings,
-        persist_directory=None 
+        persist_directory=None
     )
     return vectorstore
 
-# 4. 답변 생성 로직
+# 4. 답변 생성 로직 (LCEL 방식 적용)
 def generate_answer(api_key, vectorstore, query):
     from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
     
@@ -79,27 +74,67 @@ def generate_answer(api_key, vectorstore, query):
         }
     )
     
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 5}) # k값을 조금 늘려 정확도 향상
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
     
+    # [복구] 예전에 사용하시던 상세 프롬프트 그대로 적용
     system_prompt = (
         "당신은 '클립리포트(CLIP report v5.0)' 전문 고객 지원 및 API 개발 가이드 AI 챗봇입니다.\n"
-        "당신은 매우 유능한 서포트 엔지니어입니다. 사용자가 묻는 함수명이 Context에 존재하는지 꼼꼼히 확인하세요.\n"
-        "제공된 지식 베이스만을 바탕으로 답변하고, 없는 내용은 지어내지 마세요.\n\n"
-        "{context}"
+        "당신은 매우 유능한 서포트 엔지니어입니다. 사용자가 묻는 함수명(예: report.setDefaultSavePDFOption)이 Context에 존재하는지 철자 하나하나 대조하며 꼼꼼히 확인하세요. 비슷한 이름의 함수가 있다면 그것이 사용자가 찾는 것인지 판단하여 답변하세요.\n"
+        "모든 코드는 마크다운 코드 블록 형식을 사용하여 줄바꿈과 들여쓰기를 유지해서 출력하세요.\n"
+        "제공된 PDF 문서와 ReportView.html의 API 정보를 바탕으로 사용자의 질문에 답변하세요.\n"
+        "사용자가 특정 기능, API, 함수 등에 대해 물어보면 알맞은 ReportView API 함수명과 설명을 친절하게 설명해주세요.\n"
+        "만약 뷰어를 호출하지 않고 바로 저장하는 API 함수 알려줘. 라고 질문이 왔을때 인쇄 관련 API를 알려준다거나 하는 잘못된 정보를 제공해서는 안돼. 자세히 잘 찾아서 제공해야해\n"
+        "🚨 [매우 중요 - API 예시 코드 작성 규칙]: \n"
+        "API 사용 예시 코드를 보여줄 때는 반드시 아래의 [웹 뷰어 스크립트 템플릿] 구조 안에 해당 API를 어떻게 적용하는지 완전한 형태의 코드로 작성해서 보여주세요.\n\n"
+        "--- [웹 뷰어 스크립트 템플릿 시작] ---\n"
+        "<!DOCTYPE html>\n"
+        "<html>\n"
+        "<head>\n"
+        "<title>Report</title>\n"
+        "<script type='text/javascript'>\n"
+        "var report;\n"
+        "function html2xml(divPath){{\n"
+        "    var reportkey = \"<%=resultKey%>\";\n"
+        "    report = createReport(\"./report_server.jsp\", reportkey, document.getElementById(divPath));\n"
+        "    report.setStyle(\"close_button\", \"display:none;\");\n"
+        "    \n"
+        "    // 👇 여기에 API 적용 예시 작성\n"
+        "    \n"
+        "    report.view();\n"
+        "}}\n"
+        "</script>\n"
+        "</head>\n"
+        "<body onload=\"html2xml('targetDiv1')\">\n"
+        "<div id='targetDiv1' style='position:absolute;top:5px;left:5px;right:5px;bottom:5px;'>\n"
+        "    <span style=\"visibility: hidden; font-family:나눔고딕\">.</span>\n"
+        "</div>\n"
+        "</body>\n"
+        "</html>\n"
+        "--- [웹 뷰어 스크립트 템플릿 끝] ---\n\n"
+        "문서에 없는 내용은 지어내지 말고 '해당 내용을 찾을 수 없습니다'라고 정중히 답하세요.\n"
+        "가독성 좋게 작성하세요.\n\n"
+        "Context:\n{context}"
     )
-    
-    prompt_template = ChatPromptTemplate.from_messages([
+
+    prompt = ChatPromptTemplate.from_messages([
         ("system", system_prompt),
         ("human", "{input}"),
     ])
-    
-    question_answer_chain = create_stuff_documents_chain(llm, prompt_template)
-    rag_chain = create_retrieval_chain(retriever, question_answer_chain)
-    
-    response = rag_chain.invoke({"input": query})
-    return response["answer"]
 
-# 5. 웹 UI 화면 그리기
+    # [수정] 파이썬 3.14에서 에러 없는 LCEL 방식 체인 연결
+    def format_docs(docs):
+        return "\n\n".join(doc.page_content for doc in docs)
+
+    rag_chain = (
+        {"context": retriever | format_docs, "input": RunnablePassthrough()}
+        | prompt
+        | llm
+        | StrOutputParser()
+    )
+    
+    return rag_chain.invoke(query)
+
+# 5. 웹 UI 화면
 st.title("🤖 클립리포트 v5.0 & API 전문 챗봇")
 
 with st.sidebar:
@@ -110,27 +145,25 @@ with st.sidebar:
         st.rerun()
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 클립리포트 v5.0에 대해 궁금한 점을 물어보세요. 😊"}]
+    st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 클립리포트 매뉴얼 내용이나 ReportView API 사용법에 대해 무엇이든 물어보세요. 😊"}]
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if user_input := st.chat_input("질문을 입력하세요..."):
-    st.session_state.messages.append({"role": "user", "content": user_input})
+if prompt_input := st.chat_input("질문을 입력하세요..."):
+    st.session_state.messages.append({"role": "user", "content": prompt_input})
     with st.chat_message("user"):
-        st.markdown(user_input)
+        st.markdown(prompt_input)
 
     with st.chat_message("assistant"):
         pdf_file_path = "클립리포트 v5.0 매뉴얼.pdf" 
         
-        # 1. 벡터스토어 로드
         vectorstore = get_vectorstore(API_KEY, pdf_file_path)
         
-        # 2. 답변 생성
         with st.spinner("답변 생성 중..."):
             try:
-                answer = generate_answer(API_KEY, vectorstore, user_input)
+                answer = generate_answer(API_KEY, vectorstore, prompt_input)
                 st.markdown(answer)
                 st.session_state.messages.append({"role": "assistant", "content": answer})
             except Exception as e:
