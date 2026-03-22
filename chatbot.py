@@ -74,7 +74,7 @@ def generate_answer(api_key, vectorstore, query):
     # 필요한 라이브러리를 함수 안에서 확실히 임포트
     from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
     llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash-latest", 
+        model="gemini-1.5-flash", 
         google_api_key=api_key,
         temperature=0,
         safety_settings={
