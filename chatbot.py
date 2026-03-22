@@ -62,7 +62,6 @@ def get_vectorstore(api_key, pdf_path):
 def generate_answer(api_key, vectorstore, query):
     # 필요한 모든 도구를 한 번에 가져옵니다.
     from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
-    import google.generativeai as genai
 
     # [핵심] 구글 공식 SDK 레벨에서 v1 사용을 강제합니다.
     genai.configure(api_key=api_key, transport='rest') 
