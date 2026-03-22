@@ -58,12 +58,13 @@ def get_vectorstore(api_key, pdf_path):
     splits = text_splitter.split_documents(all_docs)
     
     # vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
-
+    # [추가] 내용이 비어있는(None이거나 공백만 있는) 문서 제거
+    valid_documents = [doc for doc in documents if doc.page_content and doc.page_content.strip()]
     # 벡터 저장소 생성 및 저장
     vectorstore = Chroma.from_documents(
-        documents=splits, 
+        documents=valid_documents, # 수정된 변수 사용
         embedding=embeddings,
-        persist_directory=persist_directory
+        persist_directory=None
     )
     return vectorstore
 
