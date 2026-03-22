@@ -1,10 +1,10 @@
 streamlit
 langchain>=0.2.0
 langchain-community
-langchain-google-genai>=1.0.7
+langchain-google-genai==1.0.7
 langchain-text-splitters
-chromadb==0.5.0
 pypdf
 sentence-transformers
 beautifulsoup4
+chromadb==0.5.3
 pydantic>=2.0
