@@ -68,7 +68,7 @@ def generate_answer(api_key, vectorstore, query):
     genai.configure(api_key=api_key, transport='rest') 
 
     llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash", 
+        model="models/gemini-1.5-flash", 
         google_api_key=api_key,
         # 에러를 일으키던 client_options 대신 아래 두 설정을 사용합니다.
         version="v1", 
