@@ -65,6 +65,7 @@ def generate_answer(api_key, vectorstore, query):
     llm = ChatGoogleGenerativeAI(
         model="gemini-1.5-flash-latest",
         google_api_key=api_key,
+        version="v1", # 지난번에 추가한 이 줄은 꼭 유지하세요!
         temperature=0,
         safety_settings={
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
