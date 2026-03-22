@@ -71,18 +71,21 @@ def get_vectorstore(api_key, pdf_path):
 
 # 4. 답변 생성 로직
 def generate_answer(api_key, vectorstore, query):
+    # 필요한 라이브러리를 함수 안에서 확실히 임포트
+    from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
+
     llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash-latest",
-    google_api_key=api_key,
-    temperature=0,
-    # 아래 설정을 추가하여 차단을 방지합니다.
-    safety_settings={
-        "HARM_CATEGORY_HARASSMENT": "BLOCK_NONE",
-        "HARM_CATEGORY_HATE_SPEECH": "BLOCK_NONE",
-        "HARM_CATEGORY_SEXUALLY_EXPLICIT": "BLOCK_NONE",
-        "HARM_CATEGORY_DANGEROUS_CONTENT": "BLOCK_NONE",
-    }
-)
+        model="gemini-1.5-flash-latest", 
+        google_api_key=api_key,  # 아까 추가한 부분
+        temperature=0,
+        # 에러가 났던 safety_settings 부분을 아래 형식으로 정확히 수정
+        safety_settings={
+            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+        }
+    )
     retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
     
     system_prompt = (
