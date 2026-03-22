@@ -67,12 +67,14 @@ def generate_answer(api_key, vectorstore, query):
     # [핵심] 구글 공식 SDK 레벨에서 v1 사용을 강제합니다.
     genai.configure(api_key=api_key, transport='rest') 
 
+    # [핵심] 404 에러를 방지하기 위해 정식 v1 주소를 직접 입력합니다.
     llm = ChatGoogleGenerativeAI(
-        model="models/gemini-1.5-flash", 
+        model="gemini-1.5-flash", 
         google_api_key=api_key,
-        # 에러를 일으키던 client_options 대신 아래 두 설정을 사용합니다.
-        version="v1", 
-        transport="rest", 
+        # v1beta로 가는 길을 원천 봉쇄하고 정식 v1 경로를 강제 지정합니다.
+        client_options={"api_endpoint": "https://generativelanguage.googleapis.com"},
+        version="v1",
+        transport="rest",
         temperature=0,
         safety_settings={
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
