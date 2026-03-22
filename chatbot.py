@@ -55,7 +55,7 @@ def generate_answer(api_key, vectorstore, query):
     # 로그에서 'Unexpected argument'라고 했던 version, transport를 제거하고 
     # 환경 변수(v1)의 힘을 믿고 깔끔하게 선언합니다.
     llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash", 
+        model="gemini-2.5-pro", 
         google_api_key=api_key,
         temperature=0,
         safety_settings={
