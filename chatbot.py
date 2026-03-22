@@ -72,7 +72,7 @@ def get_vectorstore(api_key, pdf_path):
 # 4. 답변 생성 로직
 def generate_answer(api_key, vectorstore, query):
     llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash", 
+    model="gemini-1.5-flash-latest", 
     temperature=0,
     # 아래 설정을 추가하여 차단을 방지합니다.
     safety_settings={
