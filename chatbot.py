@@ -20,12 +20,28 @@ except KeyError:
     st.stop()
 
 # 3. 문서 학습 로직
-@st.cache_resource(show_spinner="시스템 초기화 및 지식 베이스를 구축 중입니다. (최초 1회만 소요됩니다)")
+@st.cache_resource
 def get_vectorstore(api_key, pdf_path):
     os.environ["GOOGLE_API_KEY"] = api_key
     embeddings = HuggingFaceEmbeddings(model_name="jhgan/ko-sroberta-multitask")
+
+    # 벡터 저장소 경로 설정 (영구 저장 가능하도록 설정)
+    persist_directory = "./chroma_db"
+
+    # 1단계: 만약 이미 빌드된 DB 폴더(chroma_db)가 있다면? -> 바로 로드!
+    if os.path.exists(persist_directory):
+        st.info("기존에 생성된 지식 베이스를 불러옵니다.")
+        return Chroma(persist_directory=persist_directory, embedding_function=embeddings)
     
-    pdf_loader = PyPDFLoader(pdf_path)
+    # 2단계: DB 폴더가 없다면? -> 넘겨받은 pdf_path(파일명)를 사용해서 새로 구축!
+    st.warning("새로운 지식 베이스를 구축합니다. 잠시만 기다려주세요.")
+    
+    if not os.path.exists(pdf_path):
+        st.error(f"에러: '{pdf_path}' 파일이 존재하지 않습니다. 경로를 확인해주세요.")
+        st.stop()
+        
+    # 여기서 실제 pdf_path를 사용하여 로드합니다.
+    pdf_loader = PyPDFLoader(pdf_path) 
     pdf_docs = pdf_loader.load()
     
     api_url = "https://technet.hancomins.com/board/api/R5/symbols/ReportView.html"
@@ -41,19 +57,36 @@ def get_vectorstore(api_key, pdf_path):
 
     splits = text_splitter.split_documents(all_docs)
     
-    vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
+    # vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
+
+    # 벡터 저장소 생성 및 저장
+    vectorstore = Chroma.from_documents(
+        documents=splits, 
+        embedding=embeddings,
+        persist_directory=persist_directory
+    )
     return vectorstore
+
+    # return vectorstore
 
 # 4. 답변 생성 로직
 def generate_answer(api_key, vectorstore, query):
-    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0)
+    llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash", 
+    temperature=0,
+    # 아래 설정을 추가하여 차단을 방지합니다.
+    safety_settings={
+        "HARM_CATEGORY_HARASSMENT": "BLOCK_NONE",
+        "HARM_CATEGORY_HATE_SPEECH": "BLOCK_NONE",
+        "HARM_CATEGORY_SEXUALLY_EXPLICIT": "BLOCK_NONE",
+        "HARM_CATEGORY_DANGEROUS_CONTENT": "BLOCK_NONE",
+    }
+)
     retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
     
     system_prompt = (
         "당신은 '클립리포트(CLIP report v5.0)' 전문 고객 지원 및 API 개발 가이드 AI 챗봇입니다."
-        "당신은 매우 유능한 서포트 엔지니어입니다. 사용자가 묻는 함수명(예: report.setDefaultSavePDFOption)이 "
-        "Context 안에 존재하는지 철자 하나하나 대조하며 꼼꼼히 확인하세요. "
-        "비슷한 이름의 함수가 있다면 그것이 사용자가 찾는 것인지 판단하여 답변하세요."
+        "당신은 매우 유능한 서포트 엔지니어입니다. 사용자가 묻는 함수명(예: report.setDefaultSavePDFOption)이 Context에 존재하는지 철자 하나하나 대조하며 꼼꼼히 확인하세요. 비슷한 이름의 함수가 있다면 그것이 사용자가 찾는 것인지 판단하여 답변하세요."
         "모든 코드는 마크다운 코드 블록 형식을 사용하여 줄바꿈과 들여쓰기를 유지해서 출력하세요."
         "제공된 PDF 문서와 ReportView.html의 API 정보를 바탕으로 사용자의 질문에 답변하세요. "
         "사용자가 특정 기능, API, 함수 등에 대해 물어보면 알맞은 ReportView API 함수명과 설명을 친절하게 설명해주세요.\n"
