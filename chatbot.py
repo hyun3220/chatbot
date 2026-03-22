@@ -1,12 +1,12 @@
 import streamlit as st
 import os
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.document_loaders import PyPDFLoader, WebBaseLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_classic.chains import create_retrieval_chain
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
 # 1. 페이지 설정
@@ -82,7 +82,7 @@ def generate_answer(api_key, vectorstore, query):
         "HARM_CATEGORY_DANGEROUS_CONTENT": "BLOCK_NONE",
     }
 )
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
     
     system_prompt = (
         "당신은 '클립리포트(CLIP report v5.0)' 전문 고객 지원 및 API 개발 가이드 AI 챗봇입니다."
@@ -145,8 +145,8 @@ with st.sidebar:
     st.write("이 챗봇은 아래의 공식 문서를 바탕으로 답변을 제공합니다.")
     st.markdown("---")
     st.markdown("📄 **학습된 지식 베이스**")
-    st.markdown("- `클립리포트 v5.0 매뉴얼` (PDF)")
-    st.markdown("- `ReportView API 명세서` (Web)")
+    st.markdown("- `CLIP Report 5.0 매뉴얼`")
+    st.markdown("- `ReportView API`")
 
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 클립리포트 매뉴얼 내용이나 ReportView API 사용법에 대해 무엇이든 물어보세요. 😊"}]
