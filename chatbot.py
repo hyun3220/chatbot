@@ -60,12 +60,17 @@ def get_vectorstore(api_key, pdf_path):
 
 # 4. 답변 생성 로직 (LCEL 방식 적용)
 def generate_answer(api_key, vectorstore, query):
-    from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
+    from langchain_google_genai import ChatGoogleGenerativeAI
+    import google.generativeai as genai
     
+    # [핵심] 구글 공식 SDK의 설정을 먼저 강제로 v1으로 맞춥니다.
+    genai.configure(api_key=api_key, transport='rest') 
+
     llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash",
+        model="gemini-1.5-flash", 
         google_api_key=api_key,
-        version="v1", # 지난번에 추가한 이 줄은 꼭 유지하세요!
+        # 'v1'을 명시적으로 지정하여 v1beta 호출을 원천 차단합니다.
+        client_options={"api_version": "v1"}, 
         temperature=0,
         safety_settings={
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
