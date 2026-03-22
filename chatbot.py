@@ -60,18 +60,19 @@ def get_vectorstore(api_key, pdf_path):
 
 # 4. 답변 생성 로직 (LCEL 방식 적용)
 def generate_answer(api_key, vectorstore, query):
-    # ChatGoogleGenerativeAI와 함께 안전 설정 도구들을 가져옵니다.
+    # 필요한 모든 도구를 한 번에 가져옵니다.
     from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
     import google.generativeai as genai
-    
-    # [핵심] 구글 공식 SDK의 설정을 먼저 강제로 v1으로 맞춥니다.
+
+    # [핵심] 구글 공식 SDK 레벨에서 v1 사용을 강제합니다.
     genai.configure(api_key=api_key, transport='rest') 
 
     llm = ChatGoogleGenerativeAI(
         model="gemini-1.5-flash", 
         google_api_key=api_key,
-        # 'v1'을 명시적으로 지정하여 v1beta 호출을 원천 차단합니다.
-        client_options={"api_version": "v1"}, 
+        # 에러를 일으키던 client_options 대신 아래 두 설정을 사용합니다.
+        version="v1", 
+        transport="rest", 
         temperature=0,
         safety_settings={
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
@@ -81,6 +82,7 @@ def generate_answer(api_key, vectorstore, query):
         }
     )
     
+    # 지식 창고 연결
     retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
     
     # [복구] 예전에 사용하시던 상세 프롬프트 그대로 적용
