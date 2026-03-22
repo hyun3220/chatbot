@@ -4,10 +4,17 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.document_loaders import PyPDFLoader, WebBaseLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
-from langchain.chains.retrieval import create_retrieval_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.embeddings import HuggingFaceEmbeddings
+
+# [중요] 최신 버전(0.3+)에서 권장하는 경로로 수정
+try:
+    from langchain.chains.retrieval import create_retrieval_chain
+    from langchain.chains.combine_documents import create_stuff_documents_chain
+except ImportError:
+    # 위 경로가 안 될 경우를 대비한 하위 호환용 (Legacy)
+    from langchain.chains import create_retrieval_chain
+    from langchain.chains.combine_documents import create_stuff_documents_chain
 
 # 1. 페이지 설정
 st.set_page_config(page_title="클립리포트 AI 챗봇", page_icon="🤖")
