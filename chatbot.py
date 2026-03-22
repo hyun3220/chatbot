@@ -63,9 +63,10 @@ def generate_answer(api_key, vectorstore, query):
     from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
     
     llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
+        model="gemini-1.5-flash-latest"
         google_api_key=api_key,
         temperature=0,
+        version="v1", # 지난번에 추가한 이 줄은 꼭 유지하세요!
         safety_settings={
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
             HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
