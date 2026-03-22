@@ -60,7 +60,8 @@ def get_vectorstore(api_key, pdf_path):
 
 # 4. 답변 생성 로직 (LCEL 방식 적용)
 def generate_answer(api_key, vectorstore, query):
-    from langchain_google_genai import ChatGoogleGenerativeAI
+    # ChatGoogleGenerativeAI와 함께 안전 설정 도구들을 가져옵니다.
+    from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
     import google.generativeai as genai
     
     # [핵심] 구글 공식 SDK의 설정을 먼저 강제로 v1으로 맞춥니다.
