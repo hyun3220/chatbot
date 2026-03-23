@@ -18,54 +18,54 @@ from langchain_core.output_parsers import StrOutputParser
 # 1. 페이지 설정
 st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 
-# --- 스크롤 버튼 로직 시작 ---
+# --- 스크롤 버튼 로직 (자바스크립트 미사용 버전) ---
+# 최상단 지점 설정
+st.markdown("<div id='top-anchor'></div>", unsafe_allow_html=True)
+
 st.markdown("""
-    <div id="top"></div>
     <style>
-        .scroll-btn {
+        /* 버튼 전체 컨테이너 */
+        .scroll-container {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 999;
+            bottom: 100px; /* 입력창(st.chat_input) 바로 위 높이 */
+            right: 30px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        /* 공통 버튼 스타일 */
+        .scroll-link {
+            width: 45px;
+            height: 45px;
             background-color: #4F4F4F;
-            color: white;
-            padding: 10px 15px;
+            color: white !important;
             border-radius: 50%;
-            cursor: pointer;
-            border: none;
-            font-size: 20px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-            text-decoration: none;
+            text-decoration: none !important;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 20px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
         }
-        .scroll-btn:hover {
-            background-color: #333333;
+        
+        .scroll-link:hover {
+            background-color: #000000;
+            transform: scale(1.1);
         }
+
+        /* 부드러운 스크롤 효과 (브라우저 지원 시) */
         html {
             scroll-behavior: smooth;
         }
     </style>
     
-    <script>
-        function scrollToToggle() {
-            const currentPos = window.pageYOffset;
-            const docHeight = document.documentElement.scrollHeight;
-            const winHeight = window.innerHeight;
-
-            // 현재 위치가 맨 위가 아니면 위로, 맨 위면 아래로 이동
-            if (currentPos > 100) {
-                window.scrollTo(0, 0);
-            } else {
-                window.scrollTo(0, docHeight);
-            }
-        }
-    </script>
-    
-    <button onclick="scrollToToggle()" class="scroll-btn" id="scrollBtn">
-        ↕️
-    </button>
+    <div class="scroll-container">
+        <a href="#top-anchor" class="scroll-link" title="맨 위로">▲</a>
+        <a href="#bottom-anchor" class="scroll-link" title="맨 아래로">▼</a>
+    </div>
 """, unsafe_allow_html=True)
 # --- 스크롤 버튼 로직 끝 ---
 
@@ -229,3 +229,5 @@ if prompt_input := st.chat_input("질문을 입력하세요..."):
                 # 실제 원인 파악을 위해 터미널(로그)에는 에러를 찍어둡니다.
                 print(f"DEBUG ERROR: {str(e)}")
                 st.session_state.messages.append({"role": "assistant", "content": error_msg})
+
+st.markdown("<div id='bottom-anchor'></div>", unsafe_allow_html=True)
