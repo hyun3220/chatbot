@@ -1,7 +1,7 @@
 import streamlit as st
 import os
 
-# [최종 해결책] 라이브러리가 딴소리 못하게 환경 변수로 v1을 강제 고정합니다.
+# 환경 변수로 v1을 강제 고정
 os.environ["GOOGLE_API_VERSION"] = "v1"
 
 import google.generativeai as genai
@@ -15,11 +15,10 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
-# 1. 페이지 설정
+# 페이지 설정
 st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 
-# --- 스크롤 버튼 로직 (자바스크립트 미사용 버전) ---
-# 최상단 지점 설정
+# 스크롤 버튼
 st.markdown("<div id='top-anchor'></div>", unsafe_allow_html=True)
 
 st.markdown("""
@@ -67,10 +66,10 @@ st.markdown("""
         <a href="#bottom-anchor" class="scroll-link" title="맨 아래로">▼</a>
     </div>
 """, unsafe_allow_html=True)
-# --- 스크롤 버튼 로직 끝 ---
+# 스크롤 버튼 끝 
 
 # ==========================================
-# 🚀 사이드바 구성 추가
+# 사이드바 구성 추가
 # ==========================================
 with st.sidebar:
     st.markdown("<h2 style='text-align: center;'>📎 CLIP Report 5.0 AI</h2>", unsafe_allow_html=True)
@@ -87,7 +86,7 @@ with st.sidebar:
         st.rerun()
 # ==========================================
 
-# 2. API 키 설정
+# API 키 설정
 try:
     API_KEY = st.secrets["GOOGLE_API_KEY"]
     genai.configure(api_key=API_KEY)
@@ -95,7 +94,7 @@ except KeyError:
     st.error("서버에 API 키가 설정되지 않았습니다.")
     st.stop()
 
-# 3. 문서 학습 로직 (캐싱 적용)
+# 문서 학습 (캐싱 적용)
 
 @st.cache_resource
 def get_vectorstore(api_key, pdf_path):
@@ -109,7 +108,7 @@ def get_vectorstore(api_key, pdf_path):
     pdf_loader = PyPDFLoader(pdf_path)
     all_docs = pdf_loader.load()
 
-    # 웹 데이터 추가 (선택 사항)
+    # 웹 데이터 추가
     try:
         web_loader = WebBaseLoader("https://technet.hancomins.com/board/api/R5/symbols/ReportView.html")
         all_docs += web_loader.load()
@@ -121,10 +120,8 @@ def get_vectorstore(api_key, pdf_path):
 
     return Chroma.from_documents(documents=splits, embedding=embeddings)
 
-# 4. 답변 생성 로직
+# 답변 생성 로직
 def generate_answer(api_key, vectorstore, query):
-    # 로그에서 'Unexpected argument'라고 했던 version, transport를 제거하고 
-    # 환경 변수(v1)의 힘을 믿고 깔끔하게 선언합니다.
     llm = ChatGoogleGenerativeAI(
         model="gemini-2.5-flash", 
         google_api_key=api_key,
@@ -198,7 +195,7 @@ def generate_answer(api_key, vectorstore, query):
     )
     return rag_chain.invoke(query)
 
-# 5. UI 및 실행 로직
+# UI 및 실행 로직
 st.title("🤖 CLIP Report 5.0 전문 챗봇")
 
 if "messages" not in st.session_state:
@@ -221,12 +218,12 @@ if prompt_input := st.chat_input("질문을 입력하세요..."):
                 answer = generate_answer(API_KEY, vectorstore, prompt_input)
                 st.markdown(answer)
                 st.session_state.messages.append({"role": "assistant", "content": answer})
-            # 🚨 에러 처리 부분 수정
+            # 에러 처리 부분 수정
             except Exception as e:
                 # 에러 메시지에 429(할당량 초과)가 포함되어 있거나 기타 API 오류 발생 시
                 error_msg = "현재 API 서버에 문제가 있어 답변을 할 수 없습니다. 관리자에게 문의해 주시기 바랍니다."
                 st.error(error_msg)
-                # 실제 원인 파악을 위해 터미널(로그)에는 에러를 찍어둡니다.
+                # 실제 원인 파악을 위해 터미널(로그)에는 에러를 찍음
                 print(f"DEBUG ERROR: {str(e)}")
                 st.session_state.messages.append({"role": "assistant", "content": error_msg})
 
