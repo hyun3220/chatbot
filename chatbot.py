@@ -123,7 +123,7 @@ def get_vectorstore(api_key, pdf_path):
 # 답변 생성 로직
 def generate_answer(api_key, vectorstore, query):
     llm = ChatGoogleGenerativeAI(
-        model="models/gemini-1.5-flash", 
+        model="gemini-2.5-flash", 
         google_api_key=api_key,
         temperature=0,
         safety_settings={
