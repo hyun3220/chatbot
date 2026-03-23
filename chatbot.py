@@ -221,11 +221,11 @@ if prompt_input := st.chat_input("질문을 입력하세요..."):
                 st.session_state.messages.append({"role": "assistant", "content": answer})
             # 에러 처리 부분 수정
             except Exception as e:
-                # 에러 메시지에 429(할당량 초과)가 포함되어 있거나 기타 API 오류 발생 시
-                error_msg = "현재 API 서버에 문제가 있어 답변을 할 수 없습니다. 관리자에게 문의해 주시기 바랍니다."
-                st.error(error_msg)
-                # 실제 원인 파악을 위해 터미널(로그)에는 에러를 찍음
-                print(f"DEBUG ERROR: {str(e)}")
-                st.session_state.messages.append({"role": "assistant", "content": error_msg})
+                # 1. 빨간 박스로 에러의 상세 내용을 화면에 표시합니다.
+                st.error("⚠️ API 호출 중 에러가 발생했습니다!")
+                st.exception(e)  # <--- 이게 핵심입니다. 상세 에러(Traceback)를 보여줍니다.
+                
+                # 2. 세션 상태에도 기록 (선택 사항)
+                st.session_state.messages.append({"role": "assistant", "content": f"에러 발생: {str(e)}"})
 
 st.markdown("<div id='bottom-anchor'></div>", unsafe_allow_html=True)
