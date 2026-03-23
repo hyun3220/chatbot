@@ -5,7 +5,8 @@ import os
 os.environ["GOOGLE_API_VERSION"] = "v1"
 
 import google.generativeai as genai
-from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
+#from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
+from langchain_openai import ChatOpenAI
 from langchain_community.document_loaders import PyPDFLoader, WebBaseLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
@@ -73,10 +74,21 @@ def get_vectorstore(api_key, pdf_path):
 def generate_answer(api_key, vectorstore, query):
     # 로그에서 'Unexpected argument'라고 했던 version, transport를 제거하고 
     # 환경 변수(v1)의 힘을 믿고 깔끔하게 선언합니다.
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash", 
-        google_api_key=api_key,
-        temperature=0,
+    # llm = ChatGoogleGenerativeAI(
+    #     model="gemini-2.5-flash", 
+    #     google_api_key=api_key,
+    #     temperature=0,
+    #     safety_settings={
+    #         HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+    #         HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+    #         HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+    #         HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+    #     }
+    # )
+    llm = ChatOpenAI(
+        model="openrouter/google/gemma-2-9b-it:free", # 무료 모델 지정
+        openai_api_key=api_key,
+        base_url="https://openrouter.ai/api/v1",
         safety_settings={
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
             HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
