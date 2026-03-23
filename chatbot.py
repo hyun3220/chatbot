@@ -21,11 +21,11 @@ st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 # 🚀 사이드바 구성 추가
 # ==========================================
 with st.sidebar:
-    st.markdown("<h2 style='text-align: center;'>🤖 CLIP Report AI</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>📎 CLIP Report AI</h2>", unsafe_allow_html=True)
     st.markdown("<hr style='margin: 10px 0px; opacity: 0.2;'>", unsafe_allow_html=True)
     
     st.header("⚙️ 설정 및 정보")
-    st.write("클립리포트 5.0 매뉴얼 기반 지능형 챗봇입니다. API 가이드 및 예제 코드를 제공합니다.")
+    st.write("CLIP Report 5.0 매뉴얼 기반 지능형 챗봇입니다. API 가이드 및 예제 코드를 제공합니다.")
     
     st.markdown("<br>", unsafe_allow_html=True)
     
