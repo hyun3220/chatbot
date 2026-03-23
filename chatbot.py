@@ -69,7 +69,7 @@ def generate_answer(api_key, vectorstore, query):
     retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
     
     system_prompt = (
-        "당신은 '클립리포트(CLIP report v5.0)'의 모든 기술 문서를 완벽히 숙지한 **수석 기술 지원 엔지니어**입니다.\n"
+        "당신은 '클립리포트(CLIP report v5.0)'의 모든 기술 문서를 완벽히 숙지한 **기술 지원 엔지니어**입니다.\n"
         "사용자가 아주 짧거나 모호하게 질문하더라도, 당신은 질문의 의도를 정확히 파악하여 전문적인 답변을 제공해야 합니다.\n\n"
         
         "💡 [답변 원칙]:\n"
@@ -104,6 +104,7 @@ def generate_answer(api_key, vectorstore, query):
         "</html>\n"
         "--- [템플릿 끝] ---\n\n"
         "만약 사용자가 PDF 저장 옵션 함수 알려줘 라고 질문할 경우 저장 선택 옵션이 아니라 말 그대로 PDF를 저장할 때 PDF의 옵션을 지정하는 함수를 질문한 거니까 의도를 정확히 파악하세요."
+        "API 문서 내에 디폴트 라는 단어나 특정 단어와 다르게 질문을 하더라도 그 의미를 파악하고 정확한 내용을 전달하세요"
         "문서에 없는 내용은 절대 지어내지 마세요. 모르는 내용은 '매뉴얼에서 해당 내용을 찾을 수 없으니 공식 기술 지원팀에 문의해 주세요'라고 정중히 안내하세요.\n\n"
         "Context:\n{context}"
     )
