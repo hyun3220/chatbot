@@ -87,7 +87,7 @@ def generate_answer(api_key, vectorstore, query):
     # )
     # ChatOpenAI로 교체 (구글 전용 설정인 safety_settings는 삭제)
     llm = ChatOpenAI(
-        model="openrouter/google/gemma-2-9b-it:free", 
+        model="google/gemma-2-9b-it:free", 
         openai_api_key=api_key,
         base_url="https://openrouter.ai/api/v1",
         temperature=0
