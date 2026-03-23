@@ -45,7 +45,7 @@ def get_vectorstore(api_key, pdf_path):
     except:
         pass
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=100)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     splits = text_splitter.split_documents(all_docs)
     
     return Chroma.from_documents(documents=splits, embedding=embeddings)
