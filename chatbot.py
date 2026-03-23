@@ -17,6 +17,24 @@ from langchain_core.output_parsers import StrOutputParser
 # 1. 페이지 설정
 st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 
+# ==========================================
+# 🚀 사이드바 구성 추가
+# ==========================================
+with st.sidebar:
+    st.markdown("<h2 style='text-align: center;'>🤖 CLIP Report AI</h2>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 10px 0px; opacity: 0.2;'>", unsafe_allow_html=True)
+    
+    st.header("⚙️ 설정 및 정보")
+    st.write("클립리포트 5.0 매뉴얼 기반 지능형 챗봇입니다. API 가이드 및 예제 코드를 제공합니다.")
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    if st.button("🔄 대화 기록 초기화"):
+        # 리스트를 완전히 비우는 대신, 첫 인사말만 남겨두어 화면이 어색해지지 않게 처리
+        st.session_state.messages = [{"role": "assistant", "content": "무엇을 도와드릴까요?"}]
+        st.rerun()
+# ==========================================
+
 # 2. API 키 설정
 try:
     API_KEY = st.secrets["GOOGLE_API_KEY"]
