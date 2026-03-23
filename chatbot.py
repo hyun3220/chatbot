@@ -169,5 +169,11 @@ if prompt_input := st.chat_input("질문을 입력하세요..."):
                 answer = generate_answer(API_KEY, vectorstore, prompt_input)
                 st.markdown(answer)
                 st.session_state.messages.append({"role": "assistant", "content": answer})
+            # 🚨 에러 처리 부분 수정
             except Exception as e:
-                st.error(f"오류 발생: {str(e)}")
+                # 에러 메시지에 429(할당량 초과)가 포함되어 있거나 기타 API 오류 발생 시
+                error_msg = "현재 API 서버에 문제가 있어 답변을 할 수 없습니다. 관리자에게 문의해 주시기 바랍니다."
+                st.error(error_msg)
+                # 실제 원인 파악을 위해 터미널(로그)에는 에러를 찍어둡니다.
+                print(f"DEBUG ERROR: {str(e)}")
+                st.session_state.messages.append({"role": "assistant", "content": error_msg})
