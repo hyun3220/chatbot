@@ -88,7 +88,8 @@ def generate_answer(api_key, vectorstore, query):
     llm = ChatOpenAI(
         model="openrouter/google/gemma-2-9b-it:free", # 무료 모델 지정
         openai_api_key=api_key,
-        base_url="https://openrouter.ai/api/v1"
+        base_url="https://openrouter.ai/api/v1",
+        temperature=0
         # safety_settings={
         #     HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
         #     HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
