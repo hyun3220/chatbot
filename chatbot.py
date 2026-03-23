@@ -39,7 +39,7 @@ with st.sidebar:
 # 2. API 키 설정
 try:
     API_KEY = st.secrets["OPENROUTER_API_KEY"]
-    genai.configure(api_key=API_KEY)
+    # genai.configure(api_key=API_KEY)
 except KeyError:
     st.error("서버에 API 키가 설정되지 않았습니다.")
     st.stop()
