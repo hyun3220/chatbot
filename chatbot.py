@@ -4,7 +4,7 @@ import os
 # [최종 해결책] 라이브러리가 딴소리 못하게 환경 변수로 v1을 강제 고정합니다.
 # os.environ["GOOGLE_API_VERSION"] = "v1"
 
-# import google.generativeai as genai
+import google.generativeai as genai
 #from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
 from langchain_openai import ChatOpenAI
 from langchain_community.document_loaders import PyPDFLoader, WebBaseLoader
