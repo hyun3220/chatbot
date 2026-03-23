@@ -15,7 +15,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
 # 1. 페이지 설정
-st.set_page_config(page_title="클립리포트 AI 챗봇", page_icon="🤖")
+st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 
 # 2. API 키 설정
 try:
@@ -123,7 +123,7 @@ def generate_answer(api_key, vectorstore, query):
     return rag_chain.invoke(query)
 
 # 5. UI 및 실행 로직
-st.title("🤖 클립리포트 v5.0 전문 챗봇")
+st.title("🤖 CLIP Report v5.0 전문 챗봇")
 
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "무엇을 도와드릴까요?"}]
