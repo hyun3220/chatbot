@@ -103,7 +103,7 @@ def generate_answer(api_key, vectorstore, query):
         "<body><div id='targetDiv1'></div></body>\n"
         "</html>\n"
         "--- [템플릿 끝] ---\n\n"
-        
+        "만약 사용자가 PDF 저장 옵션 함수 알려줘 라고 질문할 경우 저장 선택 옵션이 아니라 말 그대로 PDF를 저장할 때 PDF의 옵션을 지정하는 함수를 질문한 거니까 의도를 정확히 파악하세요."
         "문서에 없는 내용은 절대 지어내지 마세요. 모르는 내용은 '매뉴얼에서 해당 내용을 찾을 수 없으니 공식 기술 지원팀에 문의해 주세요'라고 정중히 안내하세요.\n\n"
         "Context:\n{context}"
     )
