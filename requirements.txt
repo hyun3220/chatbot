@@ -3,6 +3,7 @@ langchain-core
 langchain-community
 langchain-google-genai
 langchain-text-splitters
+langchain-openai
 langchain-chroma
 google-generativeai
 pypdf
