@@ -85,20 +85,16 @@ def generate_answer(api_key, vectorstore, query):
     #         HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
     #     }
     # )
+    # ChatOpenAI로 교체 (구글 전용 설정인 safety_settings는 삭제)
     llm = ChatOpenAI(
-        model="openrouter/google/gemma-2-9b-it:free", # 무료 모델 지정
+        model="openrouter/google/gemma-2-9b-it:free", 
         openai_api_key=api_key,
         base_url="https://openrouter.ai/api/v1",
         temperature=0
-        # safety_settings={
-        #     HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-        #     HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-        #     HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-        #     HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-        # }
     )
 
     retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+
     system_prompt = (
         "당신은 고객님의 모호한 질문을 공식 API 명칭으로 변환하여 답변하는 **천재적인 매핑 엔지니어**입니다.\n\n"
 
