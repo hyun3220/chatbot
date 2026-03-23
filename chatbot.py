@@ -2,11 +2,11 @@ import streamlit as st
 import os
 
 # [최종 해결책] 라이브러리가 딴소리 못하게 환경 변수로 v1을 강제 고정합니다.
-# os.environ["GOOGLE_API_VERSION"] = "v1"
+os.environ["GOOGLE_API_VERSION"] = "v1"
 
 import google.generativeai as genai
-#from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
+# from langchain_openai import ChatOpenAI
 from langchain_community.document_loaders import PyPDFLoader, WebBaseLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
@@ -38,8 +38,8 @@ with st.sidebar:
 
 # 2. API 키 설정
 try:
-    API_KEY = st.secrets["OPENROUTER_API_KEY"]
-    # genai.configure(api_key=API_KEY)
+    API_KEY = st.secrets["GOOGLE_API_KEY"]
+    genai.configure(api_key=API_KEY)
 except KeyError:
     st.error("서버에 API 키가 설정되지 않았습니다.")
     st.stop()
@@ -48,7 +48,7 @@ except KeyError:
 
 @st.cache_resource
 def get_vectorstore(api_key, pdf_path):
-    os.environ["OPENROUTER_API_KEY"] = api_key
+    os.environ["GOOGLE_API_KEY"] = api_key
     embeddings = HuggingFaceEmbeddings(model_name="jhgan/ko-sroberta-multitask")
 
     if not os.path.exists(pdf_path):
@@ -74,27 +74,19 @@ def get_vectorstore(api_key, pdf_path):
 def generate_answer(api_key, vectorstore, query):
     # 로그에서 'Unexpected argument'라고 했던 version, transport를 제거하고 
     # 환경 변수(v1)의 힘을 믿고 깔끔하게 선언합니다.
-    # llm = ChatGoogleGenerativeAI(
-    #     model="gemini-2.5-flash", 
-    #     google_api_key=api_key,
-    #     temperature=0,
-    #     safety_settings={
-    #         HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-    #         HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-    #         HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-    #         HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-    #     }
-    # )
-    # ChatOpenAI로 교체 (구글 전용 설정인 safety_settings는 삭제)
-    llm = ChatOpenAI(
-        model="meta-llama/llama-3.1-8b-instruct:free", 
-        openai_api_key=api_key,
-        base_url="https://openrouter.ai/api/v1",
-        temperature=0
+    llm = ChatGoogleGenerativeAI(
+        model="gemini-2.5-flash", 
+        google_api_key=api_key,
+        temperature=0,
+        safety_settings={
+            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+        }
     )
 
     retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
-
     system_prompt = (
         "당신은 고객님의 모호한 질문을 공식 API 명칭으로 변환하여 답변하는 **천재적인 매핑 엔지니어**입니다.\n\n"
 
@@ -180,15 +172,9 @@ if prompt_input := st.chat_input("질문을 입력하세요..."):
                 st.session_state.messages.append({"role": "assistant", "content": answer})
             # 🚨 에러 처리 부분 수정
             except Exception as e:
-                # # 에러 메시지에 429(할당량 초과)가 포함되어 있거나 기타 API 오류 발생 시
-                # error_msg = "현재 API 서버에 문제가 있어 답변을 할 수 없습니다. 관리자에게 문의해 주시기 바랍니다."
-                # st.error(error_msg)
-                # # 실제 원인 파악을 위해 터미널(로그)에는 에러를 찍어둡니다.
-                # print(f"DEBUG ERROR: {str(e)}")
-                # st.session_state.messages.append({"role": "assistant", "content": error_msg})
-                # 1. 빨간 박스로 에러의 상세 내용을 화면에 표시합니다.
-                st.error("⚠️ API 호출 중 에러가 발생했습니다!")
-                st.exception(e)  # <--- 이게 핵심입니다. 상세 에러(Traceback)를 보여줍니다.
-                
-                # 2. 세션 상태에도 기록 (선택 사항)
-                st.session_state.messages.append({"role": "assistant", "content": f"에러 발생: {str(e)}"})
+                # 에러 메시지에 429(할당량 초과)가 포함되어 있거나 기타 API 오류 발생 시
+                error_msg = "현재 API 서버에 문제가 있어 답변을 할 수 없습니다. 관리자에게 문의해 주시기 바랍니다."
+                st.error(error_msg)
+                # 실제 원인 파악을 위해 터미널(로그)에는 에러를 찍어둡니다.
+                print(f"DEBUG ERROR: {str(e)}")
+                st.session_state.messages.append({"role": "assistant", "content": error_msg})
