@@ -18,6 +18,57 @@ from langchain_core.output_parsers import StrOutputParser
 # 1. 페이지 설정
 st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 
+# --- 스크롤 버튼 로직 시작 ---
+st.markdown("""
+    <div id="top"></div>
+    <style>
+        .scroll-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999;
+            background-color: #4F4F4F;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            font-size: 20px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .scroll-btn:hover {
+            background-color: #333333;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+    
+    <script>
+        function scrollToToggle() {
+            const currentPos = window.pageYOffset;
+            const docHeight = document.documentElement.scrollHeight;
+            const winHeight = window.innerHeight;
+
+            // 현재 위치가 맨 위가 아니면 위로, 맨 위면 아래로 이동
+            if (currentPos > 100) {
+                window.scrollTo(0, 0);
+            } else {
+                window.scrollTo(0, docHeight);
+            }
+        }
+    </script>
+    
+    <button onclick="scrollToToggle()" class="scroll-btn" id="scrollBtn">
+        ↕️
+    </button>
+""", unsafe_allow_html=True)
+# --- 스크롤 버튼 로직 끝 ---
+
 # ==========================================
 # 🚀 사이드바 구성 추가
 # ==========================================
