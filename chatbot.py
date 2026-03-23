@@ -38,7 +38,7 @@ with st.sidebar:
 
 # 2. API 키 설정
 try:
-    API_KEY = st.secrets["GOOGLE_API_KEY"]
+    API_KEY = st.secrets["OPENROUTER_API_KEY"]
     genai.configure(api_key=API_KEY)
 except KeyError:
     st.error("서버에 API 키가 설정되지 않았습니다.")
@@ -48,7 +48,7 @@ except KeyError:
 
 @st.cache_resource
 def get_vectorstore(api_key, pdf_path):
-    os.environ["GOOGLE_API_KEY"] = api_key
+    os.environ["OPENROUTER_API_KEY"] = api_key
     embeddings = HuggingFaceEmbeddings(model_name="jhgan/ko-sroberta-multitask")
 
     if not os.path.exists(pdf_path):
