@@ -26,65 +26,46 @@ st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 # CSS (임베디드 최적화 버전)
 st.markdown("""
     <style>
-        /* (1) 가로 스크롤 차단 및 기본 폰트 설정 */
+        /* (1) 가로 스크롤 완전 차단 및 기본 폰트 축소 */
         html, body, [data-testid="stAppViewContainer"] {
             overflow: hidden !important;
             width: 100vw !important;
             margin: 0 !important;
             padding: 0 !important;
             font-size: 13px !important;
-            background-color: transparent !important;
         }
 
-        /* (2) 스트림릿 UI 요소 완전 박멸 (상태바, 푸터, 툴바, 로고 등) */
+        /* (2) 스트림릿 기본 요소 숨김 (최대한 깔끔하게) */
         [data-testid="stHeader"], [data-testid="stFooter"], footer, header,
-        .stAppHeader, .stAppFooter, [data-testid="stStatusWidget"], .stDecoration,
-        .stActionButton, [data-testid="stToolbar"], div[class^="st-emotion-cache-1vt4y6f"],
-        #managed-footer, footer a, [data-testid="stDecoration"], .stAppToolbar,
-        div[data-testid="stStatusWidget"], div[data-testid="stToolbar"],
-        div[class*="stToolbar"], div[class*="stDecoration"], div[class*="stStatusWidget"] { 
-            visibility: hidden !important; 
+        .stAppHeader, .stAppFooter, [data-testid="stStatusWidget"], .stDecoration { 
             display: none !important; 
-            height: 0 !important;
-            padding: 0 !important;
-            margin: 0 !important;
         }
 
-        /* (3) 메인 컨테이너 위치 강제 조정 (위로 바짝 올리기) */
+        /* (3) 메인 컨테이너 여백 조정 (살짝 위로 올림) */
         .main .block-container { 
-            padding-top: 0 !important; 
-            padding-bottom: 20px !important;
+            padding-top: 5px !important; 
+            padding-bottom: 30px !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
-            margin-top: -40px !important; /* 위쪽의 거대한 공백을 제거 */
+            max-width: 100% !important;
         }
 
-        /* 모든 수직 블록의 상단 간격 제거 */
-        [data-testid="stVerticalBlock"] {
-            gap: 0px !important;
-        }
-
-        [data-testid="stVerticalBlock"] > div:first-child {
-            margin-top: 0 !important;
-            padding-top: 0 !important;
-        }
-
-        /* 4. 제품 선택 카드 (Radio) 디자인 및 위치 최적화 */
+        /* (4) 기존 카드 디자인 복구 및 상단 여백 제거 */
         div[data-testid="stRadio"] {
             background-color: var(--secondary-background-color) !important;
-            border-radius: 14px !important;
+            border-radius: 12px !important;
             padding: 10px 14px !important;
-            border: 1px solid rgba(128, 128, 128, 0.2) !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-            margin: -5px 0 12px 0 !important; /* 위로 밀착 */
-            z-index: 100 !important;
+            border: 1px solid rgba(128, 128, 128, 0.1) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+            margin: -10px 0 10px 0 !important; /* 살짝 위로 올림 */
         }
 
         div[data-testid="stRadio"] > label {
-            font-size: 0.85rem !important;
-            font-weight: 700 !important;
+            font-size: 0.8rem !important;
+            font-weight: 600 !important;
             margin-bottom: 8px !important;
-            color: #f97316 !important; /* 타이틀 강조 */
+            opacity: 0.8;
+            color: #f97316 !important;
         }
 
         div[data-testid="stRadio"] div[role="radiogroup"] {
@@ -93,37 +74,36 @@ st.markdown("""
             flex-direction: row;
         }
 
+        /* 라디오 버튼 내부 요소 숨기기 */
+        div[data-testid="stRadio"] div[role="radiogroup"] [data-testid="stWidgetSelectionControl"] {
+            display: none !important;
+        }
+
+        /* 라디오 버튼 항목 스타일 (기존 복구) */
         div[data-testid="stRadio"] div[role="radiogroup"] label {
-            background-color: rgba(128, 128, 128, 0.1) !important;
+            background-color: rgba(128, 128, 128, 0.08) !important;
             padding: 6px 12px !important;
             border-radius: 8px !important;
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
+            cursor: pointer !important;
             border: 1px solid transparent !important;
             transition: all 0.2s ease;
         }
 
-        div[data-testid="stRadio"] div[role="radiogroup"] label:hover {
-            background-color: rgba(249, 115, 22, 0.05) !important;
-            border-color: rgba(249, 115, 22, 0.2) !important;
-        }
-
+        /* 선택된 항목 스타일 (기존 복구) */
         div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
-            background-color: #f97316 !important;
-            color: white !important;
+            background-color: rgba(249, 115, 22, 0.1) !important;
+            border: 1.5px solid #f97316 !important;
+            color: #f97316 !important;
             font-weight: 700 !important;
-            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3) !important;
         }
 
-        div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) p {
-            color: white !important;
-        }
-
-        /* 채팅 영역 텍스트 크기 최적화 */
-        .stChatMessage, .stMarkdown {
-            font-size: 13.5px !important;
+        div[data-testid="stRadio"] div[role="radiogroup"] label p {
+            font-size: 0.85rem !important;
+            margin: 0 !important;
         }
     </style>
 """, unsafe_allow_html=True)
