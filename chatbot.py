@@ -86,6 +86,32 @@ st.markdown("""
             font-size: 1.2rem !important; /* 헤더류 크기 축소 */
         }
         
+        /* 💡 =============== 다크모드 호환 및 테두리/푸터 제거 =============== 💡 */
+
+        /* 1. 하단의 'Built with Streamlit' 흰색 바와 상단 헤더 완전히 숨김 */
+        header { visibility: hidden !important; display: none !important; }
+        footer { visibility: hidden !important; display: none !important; }
+
+        /* 2. Streamlit 자체 여백을 없애서 겉도는 하얀 테두리선 제거 */
+        .block-container {
+            padding-top: 1rem !important;
+            padding-bottom: 0rem !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+
+        /* 3. 배경색을 클립리포트 챗봇 창 배경색과 완전히 동일하게 맞춤 (이질감 제로) */
+        /* 기본 (라이트 모드) */
+        .stApp {
+            background-color: #fdfdfd !important;
+        }
+
+        /* 다크 모드 (사용자의 OS/브라우저가 다크모드일 때) */
+        @media (prefers-color-scheme: dark) {
+            .stApp {
+                background-color: #1e1e1e !important;
+            }
+        }
     </style>
     
     <div class="scroll-container">
