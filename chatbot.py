@@ -13,12 +13,8 @@ from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
-# 👉 추가된 부분: RunnableLambda 추가
-from langchain_core.runnables import RunnablePassthrough, RunnableLambda
-from langchain_core.output_parsers import StrOutputParser
-
-# 👉 말썽 피우던 EnsembleRetriever는 빼버리고, BM25만 놔둡니다!
 from langchain_community.retrievers import BM25Retriever
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 
 
 # 페이지 설정
@@ -75,7 +71,7 @@ except KeyError:
     st.stop()
 
 @st.cache_resource
-def get_retriever():
+def get_retriever(api_key, pdf_file_path):
     CHROMA_PERSIST_DIR = "./chroma_db"
     
     # 1. 문서 로드 및 분할 (기존과 동일)
