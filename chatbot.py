@@ -101,19 +101,6 @@ st.markdown("""
             padding-left: 1rem !important;
             padding-right: 1rem !important;
         }
-
-        /* 3. 배경색을 클립리포트 챗봇 창 배경색과 완전히 동일하게 맞춤 (이질감 제로) */
-        /* 기본 (라이트 모드) */
-        .stApp {
-            background-color: #fdfdfd !important;
-        }
-
-        /* 다크 모드 (사용자의 OS/브라우저가 다크모드일 때) */
-        @media (prefers-color-scheme: dark) {
-            .stApp {
-                background-color: #1e1e1e !important;
-            }
-        }
     </style>
 
 """, unsafe_allow_html=True)
