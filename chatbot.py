@@ -3,7 +3,7 @@ import streamlit as st
 import os
 
 # 환경 변수로 v1을 강제 고정
-#os.environ["GOOGLE_API_VERSION"] = "v1"
+os.environ["GOOGLE_API_VERSION"] = "v1"
 
 import google.generativeai as genai
 from langchain_core.output_parsers import StrOutputParser
@@ -153,7 +153,7 @@ def get_retriever(API_KEY, pdf_path):
 # 답변 생성 로직
 def generate_answer(api_key, retriever, query):
     llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash-latest", google_api_key=api_key, temperature=0,
+        model="gemini-2.5-flash", google_api_key=api_key, temperature=0,
         safety_settings={
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
             HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
@@ -203,6 +203,19 @@ def generate_answer(api_key, retriever, query):
     return rag_chain.invoke(query)
 
 # UI 및 실행 로직
+
+# 챗봇 상단에 잠시 추가해서 확인용으로 사용하세요
+if api_key_input:
+    try:
+        genai.configure(api_key=api_key_input)
+        models = genai.list_models()
+        st.write("### 📋 사용 가능한 모델 목록:")
+        for m in models:
+            if 'generateContent' in m.supported_generation_methods:
+                st.code(m.name) # 예: models/gemini-1.5-flash
+    except Exception as e:
+        st.error(f"모델 목록을 가져오는데 실패했습니다: {e}")
+        
 st.title("")
 
 if "messages" not in st.session_state:
