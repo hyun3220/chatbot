@@ -219,7 +219,8 @@ if prompt_input := st.chat_input("질문을 입력하세요..."):
                 st.session_state.messages.append({"role": "assistant", "content": answer})
             except Exception as e:
                 error_msg = "현재 API 서버에 문제가 있어 답변을 할 수 없습니다. 관리자에게 문의해 주시기 바랍니다."
-                st.error(error_msg)
+                #st.error(error_msg)
+                st.error(f"에러 내용: {str(e)}")
                 print(f"DEBUG ERROR: {str(e)}")
                 st.session_state.messages.append({"role": "assistant", "content": error_msg})
 
