@@ -44,22 +44,20 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-#st.markdown("<div id='top-anchor'></div>", unsafe_allow_html=True)
-
-# CSS (크기 축소, 반투명 스크롤 버튼, 다크/라이트모드 충돌 해결, 푸터 제거 등 모두 포함)
+# CSS (사용자 기능 유지 + UI 버그 해결 버전)
 st.markdown("""
     <style>
-        /* 1. 전체 문서 가로 스크롤 완전 차단 및 기본 폰트 축소 */
+        /* 1. 전체 가로 스크롤 차단 및 폰트 2포인트 축소 */
         html, body {
             overflow-x: hidden !important;
             width: 100vw !important;
             margin: 0 !important;
             padding: 0 !important;
             scroll-behavior: smooth;
-            font-size: 13px !important; /* 전체적으로 2포인트 축소 */
+            font-size: 13px !important;
         }
 
-        /* 2. 스트림릿 기본 요소 완전 박멸 (Deep Hiding) */
+        /* 2. 스트림릿 기본 요소 완전 제거 (푸터, 헤더 등) */
         header, footer, [data-testid="stHeader"], [data-testid="stFooter"], 
         .stAppHeader, .stAppFooter, [data-testid="stStatusWidget"], .stDecoration { 
             visibility: hidden !important; 
@@ -70,7 +68,7 @@ st.markdown("""
             pointer-events: none !important;
         }
         
-        /* 3. 메인 배포 컨테이너 여백 고정 (헤더 공간 80px 확보) */
+        /* 3. 메인 배포 컨테이너 여백 고정 (헤더 공간 확보) */
         .main .block-container { 
             padding-top: 80px !important; 
             padding-bottom: 30px !important;
@@ -79,31 +77,32 @@ st.markdown("""
             max-width: 100% !important;
         }
 
-        /* 4. 채팅 영역 및 마크다운 폰트 크기 고정 */
-        .stMarkdown, .stChatMessage, .stChatMessage p, .stMarkdown p, .stMarkdown li {
-            font-size: 13px !important;
-            line-height: 1.5 !important;
+        /* 4. 채팅 영역 가로 고정 및 줄바꿈 강제 */
+        .stChatMessage, .stMarkdown, [data-testid="stChatMessage"] {
+            width: 100% !important;
+            max-width: 100% !important;
             overflow-wrap: anywhere !important;
             word-wrap: break-word !important;
+            font-size: 13px !important;
         }
         
         pre, code {
-            font-size: 12px !important; /* 코드는 조금 더 작게 */
+            font-size: 12px !important;
             white-space: pre-wrap !important;
             word-wrap: break-word !important;
+            overflow-x: hidden !important;
         }
 
-        /* 5. [복구] 슬림 카드 선택기 디자인 */
+        /* 5. [기존 기능] 슬림 카드 선택기 디자인 복구 */
         div[data-testid="stRadio"] {
             background-color: var(--secondary-background-color);
             border-radius: 12px;
-            padding: 8px 12px !important; /* 두께 얇게 */
+            padding: 8px 12px !important;
             border: 1px solid rgba(128, 128, 128, 0.1);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             margin: 5px 0 15px 0 !important;
         }
 
-        /* 라디오 버튼 제목 */
         div[data-testid="stRadio"] > label {
             font-size: 0.8rem !important;
             font-weight: 600 !important;
@@ -111,35 +110,31 @@ st.markdown("""
             opacity: 0.8;
         }
 
-        /* 버튼 그룹 컨테이너 (한 줄 나열 고정) */
         div[data-testid="stRadio"] div[role="radiogroup"] {
             gap: 8px !important;
             display: flex;
             flex-direction: row;
-            flex-wrap: nowrap !important; /* 절대 줄바꿈 금지 */
+            flex-wrap: nowrap !important;
         }
 
-        /* 기본 라디오 원형 아이콘 숨기기 */
         div[data-testid="stRadio"] div[role="radiogroup"] [data-testid="stWidgetSelectionControl"] {
             display: none !important;
         }
 
-        /* 개별 버튼(칩) 슬림 스타일 */
         div[data-testid="stRadio"] div[role="radiogroup"] label {
             background-color: rgba(128, 128, 128, 0.08) !important;
-            padding: 5px 10px !important; /* 얇게 조정 */
+            padding: 5px 10px !important;
             border-radius: 8px !important;
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer !important;
-            min-width: 85px !important; /* 최소폭 확보하여 텍스트 보호 */
-            white-space: nowrap !important; /* 텍스트 개행 방지 */
+            min-width: 85px !important;
+            white-space: nowrap !important;
             border: 1px solid transparent !important;
         }
 
-        /* 선택된 버튼 스타일 */
         div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
             background-color: var(--background-color) !important;
             border: 1.5px solid #f97316 !important;
@@ -154,7 +149,6 @@ st.markdown("""
             white-space: nowrap !important;
         }
     </style>
-
 """, unsafe_allow_html=True)
 
 # ==========================================
@@ -277,7 +271,6 @@ def get_retriever(API_KEY):
 def generate_answer(api_key, retriever, query, mode):
     llm = ChatGoogleGenerativeAI(
         model="gemini-2.5-flash", google_api_key=api_key, temperature=0,
-        #model="gemini-3-flash", google_api_key=api_key, temperature=0,
         safety_settings={
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
             HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
@@ -345,7 +338,6 @@ def generate_answer(api_key, retriever, query, mode):
         "2. **정확성**: 함수명(예: report.print)은 대소문자와 철자를 Context와 대조하여 100% 일치할 때만 답변하세요. 확실하지 않다면 '비슷한 기능을 가진 함수'임을 명시하세요.\n"
         "3. **친절한 가이드**: 단순히 함수만 띡 던지지 말고, '이 함수는 어떤 상황에서 주로 사용되는지' 한 줄 설명을 덧붙이세요.\n\n"
         "🚨 [매우 중요 - 답변 구성 순서]:\n"
-        "고객님이 무엇을 물어보든 항상 아래 순서로 답변하세요.\n"
         "1️⃣ **기능 요약**: 질문한 기능에 대한 짧은 정의\n"
         "2️⃣ **핵심 API**: 정확한 함수명과 파라미터 설명\n"
         "3️⃣ **전체 예시 코드**: 아래 제공된 [제품별 웹 뷰어 스크립트 템플릿]에 질문한 API를 적용한 완성된 HTML 코드를 제공하세요.\n"
@@ -373,7 +365,7 @@ st.markdown("""
         background-color: #f97316; 
         color: white; 
         padding: 12px 20px; 
-        z-index: 9999; 
+        z-index: 100000; 
         display: flex; 
         align-items: center; 
         gap: 10px;
@@ -383,8 +375,6 @@ st.markdown("""
         <span style='font-weight: 700; font-size: 1rem;'>CLIP 챗봇 도우미</span>
     </div>
 """, unsafe_allow_html=True)
-
-# [삭제된 이전 위치의 헤더 코드]
 
 # [수정] 테마 대응형 슬림 선택기
 search_mode = st.radio(
