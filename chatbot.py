@@ -23,21 +23,21 @@ st.markdown("<div id='top-anchor'></div>", unsafe_allow_html=True)
 
 st.markdown("""
     <style>
-        /* 버튼 전체 컨테이너 (기존 코드) */
+                /* 버튼 전체 컨테이너 */
         .scroll-container {
             position: fixed;
-            bottom: 100px;
-            right: 30px;
+            bottom: 90px; 
+            right: 15px; /* 우측 스크롤바 영역으로 바짝 붙임 */
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px; /* 간격 축소 */
         }
         
-        /* 공통 버튼 스타일 (기존 코드) */
+        /* 공통 버튼 스타일 */
         .scroll-link {
-            width: 45px;
-            height: 45px;
+            width: 32px;  /* 버튼 크기 대폭 축소 (원래 45px) */
+            height: 32px;
             background-color: #4F4F4F;
             color: white !important;
             border-radius: 50%;
@@ -45,14 +45,16 @@ st.markdown("""
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px; /* 이 스크롤 화살표도 너무 크면 16px 등으로 조절해 보세요 */
+            font-size: 14px; /* 화살표 크기 축소 */
             box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
+            opacity: 0.3; /* 💡 핵심: 평소에는 투명도 30%로 뒤쪽 글자가 비쳐 보이게 함 */
         }
         
         .scroll-link:hover {
             background-color: #000000;
             transform: scale(1.1);
+            opacity: 1; /* 마우스 올렸을 때 100% 선명하게 띠용 나타남 */
         }
 
         html {
