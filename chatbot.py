@@ -60,16 +60,6 @@ with st.sidebar:
     st.header("⚙️ 설정 및 정보")
     st.write("CLIP Report 5.0 및 eForm 5.0 매뉴얼 기반 지능형 챗봇입니다.")
     
-    # [추가] 제품 선택 모드 (전체 제외, 리포트/이폼만 선택 가능)
-    search_mode = st.radio(
-        "검색 대상 제품 선택", 
-        ["리포트(R5)", "이폼(E5)"], 
-        index=0,
-        help="질문과 관련된 제품을 선택하세요. 선택된 제품의 API만 검색됩니다."
-    )
-    # 세션 상태에 저장하여 검색 시 활용
-    st.session_state.search_mode = "report" if "리포트" in search_mode else "eform"
-    
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("🔄 대화 기록 초기화"):
         st.session_state.messages = [{"role": "assistant", "content": "무엇을 도와드릴까요?"}]
@@ -230,8 +220,21 @@ def generate_answer(api_key, retriever, query):
 # UI 및 실행 로직
 st.title("")
 
+# [변경] 사이드바에서 메인 화면 상단으로 이동 (가용성 확보)
+st.markdown("<div style='margin-bottom: -20px;'></div>", unsafe_allow_html=True) # 간격 조정
+search_mode = st.radio(
+    "어떤 제품에 대해 물어보시나요?", 
+    ["리포트(R5)", "이폼(E5)"], 
+    index=0,
+    horizontal=True,  # 가로로 배치해서 공간 절약
+    label_visibility="visible"
+)
+# 세션 상태에 저장하여 검색 로직에서 참조
+st.session_state.search_mode = "report" if "리포트" in search_mode else "eform"
+st.markdown("<hr style='margin: 10px 0px; opacity: 0.1;'>", unsafe_allow_html=True)
+
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "무엇을 도와드릴까요?"}]
+    st.session_state.messages = [{"role": "assistant", "content": "안녕하세요. 무엇을 도와드릴까요?"}]
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
