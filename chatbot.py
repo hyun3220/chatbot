@@ -24,127 +24,35 @@ import streamlit.components.v1 as components
 st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 
 # ─────────────────────────────────────────────
-# 테마 읽기: chatbot.js가 URL에 ?theme=dark 또는 ?theme=light를 붙여서 전달
-# embed_options만으로는 세션 캐싱 문제로 반영이 안 될 수 있어 직접 CSS로 처리
+# 테마: 프리미엄 다크 모드로 고정 (사용자 요청)
 # ─────────────────────────────────────────────
-theme = st.query_params.get("theme", "dark")
-is_dark = (theme == "dark")
-
-# 테마별 색상 정의
-if is_dark:
-    bg_color        = "#0E1117"
-    secondary_bg    = "#262730"
-    text_color      = "#FAFAFA"
-    border_color    = "rgba(255,255,255,0.08)"
-    chat_bg         = "#1E1E2E"
-    input_bg        = "#1E1E2E"
-else:
-    bg_color        = "#FFFFFF"
-    secondary_bg    = "#F0F2F6"
-    text_color      = "#31333F"
-    border_color    = "rgba(0,0,0,0.08)"
-    chat_bg         = "#F8F9FA"
-    input_bg        = "#FFFFFF"
-
-# 테마 CSS 주입 - Streamlit 전체 CSS 변수를 루트 레벨에서 완전 재정의
-# embed_options 세션 캐싱 문제를 우회하여 모든 컴포넌트에 즉시 적용
-if is_dark:
-    theme_css = f"""
-        :root, [data-testid="stApp"] {{
+st.markdown("""
+    <style>
+        :root, [data-testid="stApp"] {
             color-scheme: dark;
-        }}
+        }
         html, body, [data-testid="stApp"],
-        [data-testid="stAppViewContainer"], .main {{
+        [data-testid="stAppViewContainer"], .main {
             background-color: #0E1117 !important;
             color: #FAFAFA !important;
-        }}
+        }
         /* 보조 배경 (카드, 사이드바 등) */
         [data-testid="stSidebar"],
         [data-testid="stChatMessage"],
-        div[data-testid="stRadio"] {{
+        div[data-testid="stRadio"] {
             background-color: #262730 !important;
-        }}
-        /* 텍스트 전체 */
+        }
+        /* 텍스트 색상 고정 */
         p, span, label, div, h1, h2, h3, h4, h5, h6,
-        .stMarkdown, .stMarkdown * {{
+        .stMarkdown, .stMarkdown * {
             color: #FAFAFA !important;
-        }}
-        /* 입력창 */
+        }
+        /* 입력창 스타일 */
         [data-testid="stChatInput"] textarea,
-        .stChatInputContainer textarea,
-        [data-testid="stTextInput"] input {{
+        .stChatInputContainer textarea {
             background-color: #262730 !important;
             color: #FAFAFA !important;
             border-color: rgba(255,255,255,0.1) !important;
-        }}
-        /* 라디오 버튼 accent */
-        input[type="radio"] {{
-            accent-color: #f97316 !important;
-            filter: invert(0) !important;
-        }}
-        /* 아이콘/화살표 버튼 */
-        [data-testid="stChatInputSubmitButton"] {{
-            filter: invert(0) !important;
-        }}
-    """
-else:
-    theme_css = """
-        /* ===== LIGHT MODE: 레이아웃 보존형 정밀 스타일링 ===== */
-        :root, [data-testid="stApp"] {
-            color-scheme: light;
-        }
-
-        /* (A) 앱 전체 배경 */
-        html body [data-testid="stApp"],
-        html body [data-testid="stAppViewContainer"],
-        html body .main,
-        html body section.main {
-            background-color: #FFFFFF !important;
-        }
-
-        /* (B) 채팅 메시지 배경 */
-        html body [data-testid="stChatMessage"] {
-            background-color: #F8F9FA !important;
-        }
-
-        /* (C) 채팅 텍스트 색상 (텍스트 전용 요소만 타겟) */
-        .stMarkdown p,
-        [data-testid="stChatMessageContent"] p,
-        [data-testid="stChatMessageContent"] small,
-        [data-testid="stChatInput"] textarea,
-        [data-testid="stChatInput"] textarea::placeholder {
-            color: #31333F !important;
-        }
-
-        /* (D) 하단 입력바 영역: 배경만 흰색으로 덮어쓰기 (레이아웃 보호) */
-        html body [data-testid="stBottom"],
-        html body [data-testid="stBottom"] > div {
-            background-color: #FFFFFF !important;
-        }
-        
-        /* 입력창 내부: Streamlit 기본 쉐입 유지하며 색상만 변경 */
-        html body [data-testid="stChatInput"] textarea {
-            background-color: #F0F2F6 !important;
-            color: #31333F !important;
-            border: 1px solid rgba(0,0,0,0.1) !important;
-        }
-
-        /* 제출 버튼 아이콘 색상 보정 */
-        html body [data-testid="stChatInputSubmitButton"] {
-            background-color: #f97316 !important;
-        }
-        html body [data-testid="stChatInputSubmitButton"] svg {
-            fill: #FFFFFF !important;
-            stroke: #FFFFFF !important;
-        }
-
-        /* (E) 라디오 카드 배경 */
-        html body div[data-testid="stRadio"] {
-            background-color: #F0F2F6 !important;
-        }
-        /* 라디오 버튼 레이블 텍스트 */
-        div[data-testid="stRadio"] div[role="radiogroup"] label p {
-            color: #31333F !important;
         }
         /* 미선택 라디오 인디케이터 (검은원 방지) */
         div[data-testid="stRadio"] div[role="radiogroup"] [data-testid="stWidgetSelectionControl"] span,
@@ -155,10 +63,8 @@ else:
         input[type="radio"] {
             accent-color: #f97316 !important;
         }
-    """
-
-
-st.markdown(f"<style>{theme_css}</style>", unsafe_allow_html=True)
+    </style>
+""", unsafe_allow_html=True)
 
 # CSS (임베디드 최적화 버전)
 st.markdown("""
