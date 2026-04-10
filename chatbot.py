@@ -132,7 +132,7 @@ with st.sidebar:
     
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("🔄 대화 기록 초기화"):
-        st.session_state.messages = [{"role": "assistant", "content": "무엇을 도와드릴까요?"}]
+        st.session_state.messages = [{"role": "assistant", "content": "무엇을 도와드릴까요? <span style='font-size: 12px; opacity: 0.8;'>(API 및 디자이너 관련 문의만 가능합니다.)</span>"}]
         st.rerun()
 
 # API 키 설정
@@ -310,11 +310,11 @@ search_mode = st.radio(
 st.session_state.search_mode = "report" if "리포트" in search_mode else "eform"
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "무엇을 도와드릴까요? (API 및 디자이너 관련 문의만 가능합니다.)"}]
+    st.session_state.messages = [{"role": "assistant", "content": "무엇을 도와드릴까요? <span style='font-size: 12px; opacity: 0.8;'>(API 및 디자이너 관련 문의만 가능합니다.)</span>"}]
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+        st.markdown(msg["content"], unsafe_allow_html=True)
 
 if prompt_input := st.chat_input("질문을 입력하세요..."):
     st.session_state.messages.append({"role": "user", "content": prompt_input})
@@ -342,7 +342,7 @@ if prompt_input := st.chat_input("질문을 입력하세요..."):
                 # 답변 하단에 출처 표시 추가 (글씨 크기를 줄여 참고용으로 강조)
                 final_answer = f"{answer}\n\n---\n> <span style='font-size: 12px; opacity: 0.7;'>📍 현재 답변은 **[{p_name}]** 문서를 바탕으로 작성되었습니다.</span>"
                 
-                st.markdown(final_answer)
+                st.markdown(final_answer, unsafe_allow_html=True)
                 st.session_state.messages.append({"role": "assistant", "content": final_answer})
             except Exception as e:
                 error_msg = "현재 API 서버에 문제가 있어 답변을 할 수 없습니다. 관리자에게 문의해 주시기 바랍니다."
