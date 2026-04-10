@@ -26,117 +26,104 @@ st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 # CSS (임베디드 최적화 버전)
 st.markdown("""
     <style>
-        /* (1) 가로 스크롤 완전 차단 및 기본 폰트 축소 */
+        /* (1) 가로 스크롤 차단 및 기본 폰트 설정 */
         html, body, [data-testid="stAppViewContainer"] {
-            overflow-x: hidden !important;
+            overflow: hidden !important;
             width: 100vw !important;
             margin: 0 !important;
             padding: 0 !important;
-            scroll-behavior: smooth;
             font-size: 13px !important;
+            background-color: transparent !important;
         }
 
-        /* (2) 스트림릿 기본 요소 완전 박멸 (Deep Hiding) */
+        /* (2) 스트림릿 UI 요소 완전 박멸 (상태바, 푸터, 툴바, 로고 등) */
         [data-testid="stHeader"], [data-testid="stFooter"], footer, header,
         .stAppHeader, .stAppFooter, [data-testid="stStatusWidget"], .stDecoration,
-        .stActionButton, [data-testid="stToolbar"], [data-testid="stDecoration"],
-        div[class^="st-emotion-cache-1vt4y6f"], div[class^="stCustomComponentV1"],
-        #managed-footer, .stApp [data-testid="stToolbar"], footer a,
-        .stAppHeader, .stAppViewContainer [data-testid="stHeader"],
-        .stToolbar, div[data-testid="stStatusWidget"], div[data-testid="stToolbar"] { 
+        .stActionButton, [data-testid="stToolbar"], div[class^="st-emotion-cache-1vt4y6f"],
+        #managed-footer, footer a, [data-testid="stDecoration"], .stAppToolbar,
+        div[data-testid="stStatusWidget"], div[data-testid="stToolbar"],
+        div[class*="stToolbar"], div[class*="stDecoration"], div[class*="stStatusWidget"] { 
             visibility: hidden !important; 
             display: none !important; 
             height: 0 !important;
-            width: 0 !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-        }
-        
-        /* (3) 메인 컨테이너 여백 (입력창 보호 및 푸터 밀어내기) */
-        .main .block-container { 
-            padding-top: 0 !important; 
-            padding-bottom: 50px !important; /* 여백 최적화 */
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
-            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
         }
 
-        /* 첫 번째 섹션 상단 마진 제거 */
+        /* (3) 메인 컨테이너 위치 강제 조정 (위로 바짝 올리기) */
+        .main .block-container { 
+            padding-top: 0 !important; 
+            padding-bottom: 20px !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            margin-top: -40px !important; /* 위쪽의 거대한 공백을 제거 */
+        }
+
+        /* 모든 수직 블록의 상단 간격 제거 */
+        [data-testid="stVerticalBlock"] {
+            gap: 0px !important;
+        }
+
         [data-testid="stVerticalBlock"] > div:first-child {
             margin-top: 0 !important;
             padding-top: 0 !important;
         }
 
-        /* 4. 채팅 영역 가로 고정 및 줄바꿈 강제 */
-        .stChatMessage, .stMarkdown, [data-testid="stChatMessage"] {
-            width: 100% !important;
-            max-width: 100% !important;
-            overflow-wrap: anywhere !important;
-            word-wrap: break-word !important;
-            font-size: 13px !important;
-        }
-        
-        pre, code {
-            font-size: 12px !important;
-            white-space: pre-wrap !important;
-            word-wrap: break-word !important;
-            overflow-x: hidden !important;
-        }
-
-        /* 5. [기존 기능] 슬림 카드 선택기 디자인 복구 */
+        /* 4. 제품 선택 카드 (Radio) 디자인 및 위치 최적화 */
         div[data-testid="stRadio"] {
-            background-color: var(--secondary-background-color);
-            border-radius: 12px;
-            padding: 8px 12px !important;
-            border: 1px solid rgba(128, 128, 128, 0.1);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            margin: 0px 0 10px 0 !important; /* 위쪽 여백 제거하여 위로 올림 */
+            background-color: var(--secondary-background-color) !important;
+            border-radius: 14px !important;
+            padding: 10px 14px !important;
+            border: 1px solid rgba(128, 128, 128, 0.2) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+            margin: -5px 0 12px 0 !important; /* 위로 밀착 */
+            z-index: 100 !important;
         }
 
         div[data-testid="stRadio"] > label {
-            font-size: 0.8rem !important;
-            font-weight: 600 !important;
+            font-size: 0.85rem !important;
+            font-weight: 700 !important;
             margin-bottom: 8px !important;
-            opacity: 0.8;
+            color: #f97316 !important; /* 타이틀 강조 */
         }
 
         div[data-testid="stRadio"] div[role="radiogroup"] {
-            gap: 8px !important;
+            gap: 10px !important;
             display: flex;
             flex-direction: row;
-            flex-wrap: nowrap !important;
-        }
-
-        div[data-testid="stRadio"] div[role="radiogroup"] [data-testid="stWidgetSelectionControl"] {
-            display: none !important;
         }
 
         div[data-testid="stRadio"] div[role="radiogroup"] label {
-            background-color: rgba(128, 128, 128, 0.08) !important;
-            padding: 5px 10px !important;
+            background-color: rgba(128, 128, 128, 0.1) !important;
+            padding: 6px 12px !important;
             border-radius: 8px !important;
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer !important;
-            min-width: 85px !important;
-            white-space: nowrap !important;
             border: 1px solid transparent !important;
+            transition: all 0.2s ease;
+        }
+
+        div[data-testid="stRadio"] div[role="radiogroup"] label:hover {
+            background-color: rgba(249, 115, 22, 0.05) !important;
+            border-color: rgba(249, 115, 22, 0.2) !important;
         }
 
         div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
-            background-color: var(--background-color) !important;
-            border: 1.5px solid #f97316 !important;
-            color: #f97316 !important;
+            background-color: #f97316 !important;
+            color: white !important;
             font-weight: 700 !important;
-            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.15) !important;
+            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3) !important;
         }
 
-        div[data-testid="stRadio"] div[role="radiogroup"] label p {
-            font-size: 0.8rem !important;
-            margin: 0 !important;
-            white-space: nowrap !important;
+        div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) p {
+            color: white !important;
+        }
+
+        /* 채팅 영역 텍스트 크기 최적화 */
+        .stChatMessage, .stMarkdown {
+            font-size: 13.5px !important;
         }
     </style>
 """, unsafe_allow_html=True)
