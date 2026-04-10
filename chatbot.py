@@ -58,7 +58,18 @@ with st.sidebar:
     st.markdown("<h2 style='text-align: center;'>📎 CLIP Report 5.0 AI</h2>", unsafe_allow_html=True)
     st.markdown("<hr style='margin: 10px 0px; opacity: 0.2;'>", unsafe_allow_html=True)
     st.header("⚙️ 설정 및 정보")
-    st.write("CLIP Report 5.0 매뉴얼 기반 지능형 챗봇입니다. API 가이드 및 예제 코드를 제공합니다.")
+    st.write("CLIP Report 5.0 및 eForm 5.0 매뉴얼 기반 지능형 챗봇입니다.")
+    
+    # [추가] 제품 선택 모드 (전체 제외, 리포트/이폼만 선택 가능)
+    search_mode = st.radio(
+        "검색 대상 제품 선택", 
+        ["리포트(R5)", "이폼(E5)"], 
+        index=0,
+        help="질문과 관련된 제품을 선택하세요. 선택된 제품의 API만 검색됩니다."
+    )
+    # 세션 상태에 저장하여 검색 시 활용
+    st.session_state.search_mode = "report" if "리포트" in search_mode else "eform"
+    
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("🔄 대화 기록 초기화"):
         st.session_state.messages = [{"role": "assistant", "content": "무엇을 도와드릴까요?"}]
@@ -74,46 +85,53 @@ except KeyError:
 
 @st.cache_resource
 def get_retriever(API_KEY, pdf_path):
-    CHROMA_PERSIST_DIR = "./chroma_db"
+    # 기존기억을 지우고 분류된 데이터를 저장하기 위해 새 버전(v4) 폴더 사용
+    CHROMA_PERSIST_DIR = "./chroma_db_v4"
     
-     # 1. 문서 보관할 리스트 초기화
     docs = [] 
     
-    # 2. 테크넷 URL 설정
-    urls = [
-        "https://technet.hancomins.com/board/api/R5/symbols/ReportView.html"
+    # 2. 테크넷 URL 설정 (태그와 함께 로드)
+    source_configs = [
+        {"url": "https://technet.hancomins.com/board/api/R5/symbols/ReportView.html", "category": "report"},
+        {"url": "https://technet.hancomins.com/board/api/E5/symbols/Report.html", "category": "eform"}
     ]
     
-    # 웹 페이지 로드
-    for url in urls:
-        st.sidebar.text(f"URL 로딩 중: {url}")
-        loader = WebBaseLoader(url)
-        docs.extend(loader.load())
+    for config in source_configs:
+        try:
+            st.sidebar.text(f"URL 로딩 중 ({config['category']}): {config['url']}")
+            loader = WebBaseLoader(config['url'])
+            loaded_docs = loader.load()
+            # 메타데이터에 카테고리 추가
+            for d in loaded_docs:
+                d.metadata["category"] = config["category"]
+            docs.extend(loaded_docs)
+        except Exception as e:
+            st.sidebar.warning(f"URL 로드 실패: {config['url']}")
     
-   # 3. PDF 로드 (사용자님이 지정하신 파일명 확인)
-    # 전달받은 pdf_path에 "클립리포트 v5.0 매뉴얼.pdf"가 들어옵니다.
+    # 3. PDF 로드 (기본은 리포트 카테고리로 지정)
     if pdf_path and os.path.exists(pdf_path):
         try:
             pdf_loader = PyPDFLoader(pdf_path)
-            docs.extend(pdf_loader.load())
+            loaded_pdf = pdf_loader.load()
+            for d in loaded_pdf:
+                d.metadata["category"] = "report"
+            docs.extend(loaded_pdf)
         except Exception as e:
             st.sidebar.error(f"PDF 로드 실패: {str(e)}")
-    else:
-        st.sidebar.warning(f"PDF 파일을 찾을 수 없습니다: {pdf_path}")
         
     # 문서를 크게 쪼개기 (문맥 유지)
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=300)
-    docs = text_splitter.split_documents(docs)
+    splits = text_splitter.split_documents(docs)
     
     # 2. 리트리버 세팅
     try:
-        # 키워드 기반 BM25 리트리버
-        bm25_retriever = BM25Retriever.from_documents(docs)
+        # 키워드 기반 BM25 리트리버 (전체 데이터 기반)
+        bm25_retriever = BM25Retriever.from_documents(splits)
         bm25_retriever.k = 10  
         
         # 의미 기반 Chroma 벡터 리트리버
         vectorstore = Chroma.from_documents(
-            documents=docs,
+            documents=splits,
             embedding=HuggingFaceEmbeddings(
                 model_name="jhgan/ko-sroberta-multitask",
                 model_kwargs={'device': 'cpu'},
@@ -121,29 +139,35 @@ def get_retriever(API_KEY, pdf_path):
             ),
             persist_directory=CHROMA_PERSIST_DIR
         )
-        chroma_retriever = vectorstore.as_retriever(search_kwargs={"k": 10})
         
         # 🚀 랭체인 패키지 에러 우회! 직접 하이브리드 엔진 함수 생성
         def custom_hybrid_search(query: str):
-            # 두 검색 엔진에서 각각 결과를 가져옴
-            docs_bm25 = bm25_retriever.invoke(query)
-            docs_chroma = chroma_retriever.invoke(query)
+            # 현재 선택된 모드 가져오기
+            current_mode = st.session_state.get("search_mode", "report")
             
-            # 중복을 없애고 두 결과를 지퍼(zip)처럼 교차 결합!
+            # 검색 엔진에서 각각 결과를 가져옴 (Chroma는 필터링 적용)
+            docs_bm25 = bm25_retriever.invoke(query)
+            docs_chroma = vectorstore.as_retriever(
+                search_kwargs={"k": 10, "filter": {"category": current_mode}}
+            ).invoke(query)
+            
+            # 중복 제거 및 필터링된 결과 결합!
             merged_docs = []
             seen_content = set()
             
             for d1, d2 in zip(docs_bm25 + [None]*10, docs_chroma + [None]*10):
-                if d1 and d1.page_content not in seen_content:
+                # BM25 결과 중에서 현재 선택된 카테고리인 것만 필터링
+                if d1 and d1.metadata.get("category") == current_mode and d1.page_content not in seen_content:
                     seen_content.add(d1.page_content)
                     merged_docs.append(d1)
+                
+                # Chroma 결과 (이미 필터링됨) 결합
                 if d2 and d2.page_content not in seen_content:
                     seen_content.add(d2.page_content)
                     merged_docs.append(d2)
                     
-            return merged_docs[:15] # 상위 15개 텍스트 리턴
+            return merged_docs[:15]
 
-        # 만든 무적 함수를 Runnable로 던져줍니다!
         return RunnableLambda(custom_hybrid_search)
         
     except Exception as e:
