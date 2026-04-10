@@ -47,6 +47,50 @@ st.markdown("""
         h1, h2, h3 { font-size: 1.2rem !important; }
         header, footer { visibility: hidden !important; display: none !important; }
         .block-container { padding: 1rem !important; }
+
+        /* [추가] 프리미엄 카드 선택기 스타일 */
+        .selector-card {
+            background-color: #ffffff;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 24px rgba(149, 157, 165, 0.15);
+            border: 1px solid #f0f0f0;
+            text-align: center;
+        }
+        
+        /* 스트림릿 라디오 버튼을 칩(Chip) 형태로 변형 */
+        div[data-testid="stRadio"] > label {
+            font-weight: 600 !important;
+            color: #4b5563 !important;
+            margin-bottom: 12px !important;
+            display: block !important;
+        }
+        div[data-testid="stRadio"] div[role="radiogroup"] {
+            background-color: #f3f4f6;
+            padding: 4px;
+            border-radius: 12px;
+            gap: 4px !important;
+        }
+        div[data-testid="stRadio"] div[role="radiogroup"] label {
+            background-color: transparent !important;
+            border: none !important;
+            padding: 8px 20px !important;
+            border-radius: 10px !important;
+            margin: 0 !important;
+            transition: all 0.3s ease !important;
+            flex: 1;
+            justify-content: center;
+        }
+        div[data-testid="stRadio"] div[role="radiogroup"] label[data-baseweb="radio"] {
+            background-color: transparent !important;
+        }
+        /* 선택된 버튼 스타일 */
+        div[data-testid="stRadio"] div[role="radiogroup"] label:has(input[checked]) {
+            background-color: #ffffff !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+            color: #f97316 !important; /* 주황색 포인트 */
+        }
     </style>
 
 """, unsafe_allow_html=True)
@@ -220,18 +264,18 @@ def generate_answer(api_key, retriever, query):
 # UI 및 실행 로직
 st.title("")
 
-# [변경] 사이드바에서 메인 화면 상단으로 이동 (가용성 확보)
-st.markdown("<div style='margin-bottom: -20px;'></div>", unsafe_allow_html=True) # 간격 조정
+# [변경] 상단 카드형 선택기 적용
+st.markdown("<div class='selector-card'>", unsafe_allow_html=True)
 search_mode = st.radio(
-    "어떤 제품에 대해 물어보시나요?", 
+    "어떤 제품에 대해 궁금하신가요?", 
     ["리포트(R5)", "이폼(E5)"], 
     index=0,
-    horizontal=True,  # 가로로 배치해서 공간 절약
-    label_visibility="visible"
+    horizontal=True
 )
-# 세션 상태에 저장하여 검색 로직에서 참조
+st.markdown("</div>", unsafe_allow_html=True)
+
+# 세션 상태 저장
 st.session_state.search_mode = "report" if "리포트" in search_mode else "eform"
-st.markdown("<hr style='margin: 10px 0px; opacity: 0.1;'>", unsafe_allow_html=True)
 
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "안녕하세요. 무엇을 도와드릴까요?"}]
