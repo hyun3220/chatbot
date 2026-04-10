@@ -71,7 +71,7 @@ st.markdown("""
 
         /* 2. 챗봇 대화 내용 글자 크기 */
         .stMarkdown p, .stMarkdown li {
-            font-size: 14px !important;
+            font-size: 16px !important;
         }
 
         /* 3. 하단 채팅 입력창(텍스트란) 글자 크기 */
@@ -236,7 +236,7 @@ def generate_answer(api_key, vectorstore, query):
     return rag_chain.invoke(query)
 
 # UI 및 실행 로직
-st.title("🤖 CLIP Report 5.0 전문 챗봇")
+st.title(" 🤖 CLIP Report 5.0 전문 챗봇")
 
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "무엇을 도와드릴까요?"}]
