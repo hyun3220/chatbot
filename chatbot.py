@@ -52,53 +52,70 @@ st.markdown("""
         div[data-testid="stRadio"] {
             background-color: var(--secondary-background-color);
             border-radius: 12px;
-            padding: 8px 12px !important;
+            padding: 10px 14px !important;
             border: 1px solid rgba(128, 128, 128, 0.1);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
-        /* 라디오 버튼 제목 스타일 (얇게) */
+        /* 라디오 버튼 제목 */
         div[data-testid="stRadio"] > label {
-            font-size: 0.85rem !important;
+            font-size: 0.8rem !important;
             font-weight: 600 !important;
             color: var(--text-color) !important;
-            margin-bottom: 8px !important;
-            opacity: 0.8;
+            margin-bottom: 10px !important;
+            opacity: 0.7;
+            text-align: left;
         }
 
         /* 버튼 그룹 컨테이너 */
         div[data-testid="stRadio"] div[role="radiogroup"] {
-            gap: 8px !important;
-            justify-content: space-between;
+            gap: 10px !important;
+            display: flex;
+            flex-direction: row;
+        }
+
+        /* 기본 라디오 원형 아이콘 숨기기 */
+        div[data-testid="stRadio"] div[role="radiogroup"] [data-testid="stWidgetSelectionControl"] {
+            display: none !important;
         }
 
         /* 개별 버튼(칩) 스타일 */
         div[data-testid="stRadio"] div[role="radiogroup"] label {
-            background-color: transparent !important;
-            padding: 5px 12px !important;
-            border-radius: 8px !important;
-            transition: all 0.2s ease !important;
+            background-color: rgba(128, 128, 128, 0.05) !important;
+            padding: 6px 15px !important;
+            border-radius: 10px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             min-width: fit-content !important;
-            white-space: nowrap !important; /* 글자 줄바꿈 방지 */
+            white-space: nowrap !important;
             flex: 1;
             display: flex;
             justify-content: center;
             border: 1px solid transparent !important;
+            cursor: pointer !important;
+            margin: 0 !important;
         }
 
-        /* 선택된 버튼 스타일 (테마 대응) */
-        div[data-testid="stRadio"] div[role="radiogroup"] label:has(input[checked]) {
+        /* [핵심] 선택된 버튼 스타일 - 샥 이동하는 효과 */
+        div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
             background-color: var(--background-color) !important;
-            border: 1px solid rgba(249, 115, 22, 0.3) !important;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important;
+            border: 1.5px solid #f97316 !important; /* 주황색 강조 */
+            box-shadow: 0 4px 10px rgba(249, 115, 22, 0.15) !important;
             color: #f97316 !important;
+            font-weight: bold !important;
+            transform: translateY(-1px);
         }
-        
-        /* 숨겨진 라이오 버튼 동그라미 제거 */
-        div[data-testid="stRadio"] div[role="radiogroup"] div[data-testid="stMarkdownContainer"] p {
+
+        /* 마우스 호버 효과 */
+        div[data-testid="stRadio"] div[role="radiogroup"] label:hover {
+            background-color: rgba(128, 128, 128, 0.1) !important;
+        }
+
+        /* 텍스트 정렬 */
+        div[data-testid="stRadio"] div[role="radiogroup"] label div[data-testid="stMarkdownContainer"] p {
             font-size: 0.85rem !important;
             margin: 0 !important;
+            text-align: center;
         }
     </style>
 
