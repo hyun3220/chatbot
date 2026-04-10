@@ -23,10 +23,10 @@ st.markdown("<div id='top-anchor'></div>", unsafe_allow_html=True)
 
 st.markdown("""
     <style>
-        /* 버튼 전체 컨테이너 */
+        /* 버튼 전체 컨테이너 (기존 코드) */
         .scroll-container {
             position: fixed;
-            bottom: 100px; /* 입력창(st.chat_input) 바로 위 높이 */
+            bottom: 100px;
             right: 30px;
             z-index: 1000;
             display: flex;
@@ -34,7 +34,7 @@ st.markdown("""
             gap: 10px;
         }
         
-        /* 공통 버튼 스타일 */
+        /* 공통 버튼 스타일 (기존 코드) */
         .scroll-link {
             width: 45px;
             height: 45px;
@@ -45,7 +45,7 @@ st.markdown("""
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 20px; /* 이 스크롤 화살표도 너무 크면 16px 등으로 조절해 보세요 */
             box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
         }
@@ -55,10 +55,37 @@ st.markdown("""
             transform: scale(1.1);
         }
 
-        /* 부드러운 스크롤 효과 (브라우저 지원 시) */
         html {
             scroll-behavior: smooth;
         }
+
+        /* 💡 =============== 추가된 글꼴 크기 세밀 조절 부분 =============== 💡 */
+        
+        /* 1. HTML 전체 기본 폰트 크기 및 줄간격 축소 (Streamlit 특유의 여백 줄이기) */
+        html, body, [class*="css"] {
+            font-size: 14px !important; 
+            line-height: 1.5 !important;
+        }
+
+        /* 2. 챗봇 대화 내용 글자 크기 */
+        .stMarkdown p, .stMarkdown li {
+            font-size: 14px !important;
+        }
+
+        /* 3. 하단 채팅 입력창(텍스트란) 글자 크기 */
+        .stChatInput textarea {
+            font-size: 14px !important;
+        }
+
+        /* 4. 사이드바(제목, 버튼) 글자 크기 조금 더 작게 */
+        .stButton button p {
+            font-size: 13px !important;
+        }
+        
+        h1, h2, h3 {
+            font-size: 1.2rem !important; /* 헤더류 크기 축소 */
+        }
+        
     </style>
     
     <div class="scroll-container">
@@ -66,6 +93,7 @@ st.markdown("""
         <a href="#bottom-anchor" class="scroll-link" title="맨 아래로">▼</a>
     </div>
 """, unsafe_allow_html=True)
+
 # 스크롤 버튼 끝 
 
 # ==========================================
