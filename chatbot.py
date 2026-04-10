@@ -19,7 +19,7 @@ from langchain_core.output_parsers import StrOutputParser
 st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 
 # 스크롤 버튼
-st.markdown("<div id='top-anchor'></div>", unsafe_allow_html=True)
+#st.markdown("<div id='top-anchor'></div>", unsafe_allow_html=True)
 
 st.markdown("""
     <style>
@@ -116,10 +116,10 @@ st.markdown("""
         }
     </style>
     
-    <div class="scroll-container">
+    /*<div class="scroll-container">
         <a href="#top-anchor" class="scroll-link" title="맨 위로">▲</a>
         <a href="#bottom-anchor" class="scroll-link" title="맨 아래로">▼</a>
-    </div>
+    </div>*/
 """, unsafe_allow_html=True)
 
 # 스크롤 버튼 끝 
@@ -284,4 +284,4 @@ if prompt_input := st.chat_input("질문을 입력하세요..."):
                 print(f"DEBUG ERROR: {str(e)}")
                 st.session_state.messages.append({"role": "assistant", "content": error_msg})
 
-st.markdown("<div id='bottom-anchor'></div>", unsafe_allow_html=True)
+#st.markdown("<div id='bottom-anchor'></div>", unsafe_allow_html=True)
