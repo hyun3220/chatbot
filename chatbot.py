@@ -39,7 +39,9 @@ st.markdown("""
         /* (2) 스트림릿 기본 요소 완전 박멸 (Deep Hiding) */
         header, footer, [data-testid="stHeader"], [data-testid="stFooter"], 
         .stAppHeader, .stAppFooter, [data-testid="stStatusWidget"], .stDecoration,
-        .stActionButton, [data-testid="stToolbar"] { 
+        .stActionButton, [data-testid="stToolbar"], [data-testid="stDecoration"],
+        div[class^="st-emotion-cache-1vt4y6f"], div[class^="stCustomComponentV1"],
+        #managed-footer, .stApp [data-testid="stToolbar"] { 
             visibility: hidden !important; 
             display: none !important; 
             height: 0 !important;
@@ -52,11 +54,6 @@ st.markdown("""
         .main .block-container { 
             padding-top: 50px !important; 
             padding-bottom: 30px !important;
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
-            max-width: 100% !important;
-        }
-
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
