@@ -44,7 +44,7 @@ st.markdown("""
         /* (3) 메인 컨테이너 여백 조정 (위로 더 올림) */
         .main .block-container { 
             padding-top: 0 !important; 
-            padding-bottom: 20px !important;
+            padding-bottom: 70px !important; /* iframe 50px 확장 보정 - 입력창 보호 */
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
