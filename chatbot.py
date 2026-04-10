@@ -71,7 +71,7 @@ st.markdown("""
 
         /* 2. 챗봇 대화 내용 글자 크기 */
         .stMarkdown p, .stMarkdown li {
-            font-size: 16px !important;
+            font-size: 14px !important;
         }
 
         /* 3. 하단 채팅 입력창(텍스트란) 글자 크기 */
