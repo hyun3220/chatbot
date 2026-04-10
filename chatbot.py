@@ -97,7 +97,7 @@ else:
             background-color: #FFFFFF !important;
             color: #31333F !important;
         }}
-        /* 보조 배경 (카드, 사이드바 등) */
+        /* 보조 배경 (카드 등) */
         [data-testid="stSidebar"],
         [data-testid="stChatMessage"],
         div[data-testid="stRadio"] {{
@@ -108,39 +108,36 @@ else:
         .stMarkdown, .stMarkdown * {{
             color: #31333F !important;
         }}
-        /* ★ 하단 입력바 전체 배경 (stBottom이 dark로 남던 원인) */
+        /* ★ 하단 입력바: 와일드카드로 stBottom 내 모든 요소 강제 동화 */
         [data-testid="stBottom"],
-        [data-testid="stBottom"] > div,
-        [data-testid="stChatInputContainer"],
+        [data-testid="stBottom"] *,
         .stChatFloatingInputContainer,
-        .stChatInputContainer {{
+        .stChatFloatingInputContainer *,
+        [data-testid="stChatInputContainer"],
+        [data-testid="stChatInputContainer"] *,
+        [data-baseweb="base-input"],
+        [data-baseweb="base-input"] * {{
             background-color: #FFFFFF !important;
-            border-top: 1px solid rgba(0,0,0,0.07) !important;
+            color: #31333F !important;
         }}
-        /* 입력창 textarea */
+        /* textarea 입력츘c을 더 구체적으로 */
         [data-testid="stChatInput"] textarea,
-        .stChatInputContainer textarea,
-        [data-testid="stTextInput"] input {{
+        .stChatInputContainer textarea {{
             background-color: #F0F2F6 !important;
             color: #31333F !important;
-            border-color: rgba(0,0,0,0.1) !important;
+            border: 1px solid rgba(0,0,0,0.15) !important;
         }}
-        /* 라디오 버튼 accent */
+        /* 라디오 버튼 */
         input[type="radio"] {{
             accent-color: #f97316 !important;
-            filter: invert(0) !important;
         }}
-        /* 제출 버튼 라이트모드 */
+        /* 제출 버튼 */
         [data-testid="stChatInputSubmitButton"] {{
             background-color: #f97316 !important;
         }}
         [data-testid="stChatInputSubmitButton"] svg {{
             fill: #FFFFFF !important;
             stroke: #FFFFFF !important;
-        }}
-        /* 채팅 메시지 아이콘 */
-        [data-testid="stChatMessageAvatarAssistant"] {{
-            background-color: #FF6B35 !important;
         }}
     """
 
@@ -164,10 +161,10 @@ st.markdown("""
             display: none !important; 
         }
 
-        /* (3) 메인 컨테이너 여백 조정 - 콘텐츠 위로 올림 */
+        /* (3) 메인 컨테이너 - 콘텐츠 위로 충분히 올림 */
         .main .block-container { 
             padding-top: 0 !important;
-            margin-top: -20px !important;  /* 전체 콘텐츠를 위로 올림 */
+            margin-top: -40px !important;  /* 카드+메시지 영역 상단으로 밀착 */
             padding-bottom: 70px !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
@@ -188,7 +185,7 @@ st.markdown("""
             padding: 8px 12px !important;
             border: 1px solid rgba(128, 128, 128, 0.1) !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
-            margin: -25px 0 10px 0 !important;
+            margin: -35px 0 10px 0 !important;  /* 카드도 위로 더 올림 */
         }
 
         div[data-testid="stRadio"] > label {
