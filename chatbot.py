@@ -6,6 +6,8 @@ import os
 os.environ["GOOGLE_API_VERSION"] = "v1"
 
 import google.generativeai as genai
+from langchain_core.output_parsers import StrOutputParser
+
 from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
 from langchain_community.document_loaders import PyPDFLoader, WebBaseLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
