@@ -310,7 +310,7 @@ search_mode = st.radio(
 st.session_state.search_mode = "report" if "리포트" in search_mode else "eform"
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "무엇을 도와드릴까요?"}]
+    st.session_state.messages = [{"role": "assistant", "content": "무엇을 도와드릴까요? (API 및 디자이너 관련 문의만 가능합니다.)"}]
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
@@ -339,8 +339,8 @@ if prompt_input := st.chat_input("질문을 입력하세요..."):
                 
                 answer = generate_answer(API_KEY, selected_retriever, prompt_input, current_mode)
                 
-                # 답변 하단에 출처 표시 추가 (사용자 확신 제공)
-                final_answer = f"{answer}\n\n---\n> 📍 **현재 답변은 [{p_name}] 문서를 바탕으로 작성되었습니다.**"
+                # 답변 하단에 출처 표시 추가 (글씨 크기를 줄여 참고용으로 강조)
+                final_answer = f"{answer}\n\n---\n> <span style='font-size: 12px; opacity: 0.7;'>📍 현재 답변은 **[{p_name}]** 문서를 바탕으로 작성되었습니다.</span>"
                 
                 st.markdown(final_answer)
                 st.session_state.messages.append({"role": "assistant", "content": final_answer})
