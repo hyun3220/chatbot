@@ -50,6 +50,14 @@ st.markdown("""
             max-width: 100% !important;
         }
 
+        /* 입력창 하단에서 살짝 위로 올리기 */
+        [data-testid="stBottom"] {
+            padding-bottom: 12px !important;
+        }
+        .stChatInputContainer, [data-testid="stChatInputContainer"] {
+            margin-bottom: 8px !important;
+        }
+
         /* (4) 슬림한 카드 디자인 및 위치 조정 */
         div[data-testid="stRadio"] {
             background-color: var(--secondary-background-color) !important;
