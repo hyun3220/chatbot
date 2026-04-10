@@ -41,35 +41,35 @@ st.markdown("""
             display: none !important; 
         }
 
-        /* (3) 메인 컨테이너 여백 조정 (살짝 위로 올림) */
+        /* (3) 메인 컨테이너 여백 조정 (위로 더 올림) */
         .main .block-container { 
-            padding-top: 5px !important; 
-            padding-bottom: 30px !important;
+            padding-top: 0 !important; 
+            padding-bottom: 20px !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
         }
 
-        /* (4) 기존 카드 디자인 복구 및 상단 여백 제거 */
+        /* (4) 슬림한 카드 디자인 및 위치 조정 */
         div[data-testid="stRadio"] {
             background-color: var(--secondary-background-color) !important;
-            border-radius: 12px !important;
-            padding: 10px 14px !important;
+            border-radius: 10px !important;
+            padding: 8px 12px !important; /* 전체적인 패딩 축소 */
             border: 1px solid rgba(128, 128, 128, 0.1) !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
-            margin: -10px 0 10px 0 !important; /* 살짝 위로 올림 */
+            margin: -25px 0 10px 0 !important; /* 위로 더 올림 */
         }
 
         div[data-testid="stRadio"] > label {
-            font-size: 0.8rem !important;
+            font-size: 11.5px !important; /* 폰트 살짝 축소 */
             font-weight: 600 !important;
-            margin-bottom: 8px !important;
-            opacity: 0.8;
+            margin-bottom: 6px !important;
+            opacity: 0.9;
             color: #f97316 !important;
         }
 
         div[data-testid="stRadio"] div[role="radiogroup"] {
-            gap: 10px !important;
+            gap: 8px !important; /* 버튼 간격 소폭 축소 */
             display: flex;
             flex-direction: row;
         }
@@ -79,11 +79,11 @@ st.markdown("""
             display: none !important;
         }
 
-        /* 라디오 버튼 항목 스타일 (기존 복구) */
+        /* 슬림한 버튼 스타일 */
         div[data-testid="stRadio"] div[role="radiogroup"] label {
             background-color: rgba(128, 128, 128, 0.08) !important;
-            padding: 6px 12px !important;
-            border-radius: 8px !important;
+            padding: 4px 8px !important; /* 상하 패딩을 줄여서 아주 얇게 만듦 */
+            border-radius: 6px !important;
             flex: 1;
             display: flex;
             justify-content: center;
@@ -91,19 +91,23 @@ st.markdown("""
             cursor: pointer !important;
             border: 1px solid transparent !important;
             transition: all 0.2s ease;
+            min-height: 28px !important; /* 최소 높이 설정으로 날렵하게 유지 */
         }
 
-        /* 선택된 항목 스타일 (기존 복구) */
+        /* 한 줄 표시 및 텍스트 스타일 */
+        div[data-testid="stRadio"] div[role="radiogroup"] label p {
+            font-size: 11.5px !important; /* 폰트 살짝 축소 */
+            margin: 0 !important;
+            white-space: nowrap !important; /* 절대 개행되지 않도록 설정 */
+            overflow: visible !important;
+        }
+
+        /* 선택된 항목 스타일 */
         div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
             background-color: rgba(249, 115, 22, 0.1) !important;
-            border: 1.5px solid #f97316 !important;
+            border: 1.2px solid #f97316 !important;
             color: #f97316 !important;
             font-weight: 700 !important;
-        }
-
-        div[data-testid="stRadio"] div[role="radiogroup"] label p {
-            font-size: 0.85rem !important;
-            margin: 0 !important;
         }
     </style>
 """, unsafe_allow_html=True)
