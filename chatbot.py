@@ -128,91 +128,100 @@ with st.sidebar:
     st.markdown("<h2 style='text-align: center;'>📎 CLIP Report 5.0 AI</h2>", unsafe_allow_html=True)
     st.markdown("<hr style='margin: 10px 0px; opacity: 0.2;'>", unsafe_allow_html=True)
     st.header("⚙️ 설정 및 정보")
-    st.write("CLIP Report 5.0 및 eForm 5.0 매뉴얼 기반 지능형 챗봇입니다.")
+    st.write("CLIP Report 5.0 및 eForm 5.0 매뉴얼 기반 지능형 챗봇입니다@st.cache_resource
+def get_retriever(API_KEY):
+    # 기존기억을 지우고 분류된 데이터를 저장하기 위해 새 버전(v5) 폴더 사용
+    CHROMA_PERSIST_DIR = "./chroma_db_v5"
     
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("🔄 대화 기록 초기화"):
-        st.session_state.messages = [{"role": "assistant", "content": "무엇을 도와드릴까요?"}]
-        st.rerun()
+    # 1. 소스 정의 (API 전용 URL / 디자이너 전용 PDF)
+    # 리포트(R5) 전용
+    r5_sources = {
+        "url": "https://technet.hancomins.com/board/api/R5/symbols/ReportView.html",
+        "pdf": "클립리포트 v5.0 매뉴얼.pdf",
+        "category": "report"
+    }
+    # 이폼(E5) 전용
+    e5_sources = {
+        "url": "https://technet.hancomins.com/board/api/E5/symbols/Report.html",
+        "pdf": "클립이폼 v5.0 매뉴얼.pdf",
+        "category": "eform"
+    }
 
-# API 키 설정
-try:
-    API_KEY = st.secrets["GOOGLE_API_KEY"]
-    genai.configure(api_key=API_KEY)
-except KeyError:
-    st.error("서버에 API 키가 설정되지 않았습니다.")
-    st.stop()
+    retrievers = {}
 
-@st.cache_resource
-def get_retriever(API_KEY, pdf_path):
-    # 기존기억을 지우고 분류된 데이터를 저장하기 위해 새 버전(v4) 폴더 사용
-    CHROMA_PERSIST_DIR = "./chroma_db_v4"
-    
-    docs = [] 
-    
-    # 2. 테크넷 URL 설정 (태그와 함께 로드)
-    source_configs = [
-        {"url": "https://technet.hancomins.com/board/api/R5/symbols/ReportView.html", "category": "report"},
-        {"url": "https://technet.hancomins.com/board/api/E5/symbols/Report.html", "category": "eform"}
-    ]
-    
-    for config in source_configs:
+    for mode, config in [("report", r5_sources), ("eform", e5_sources)]:
         try:
-            st.sidebar.text(f"URL 로딩 중 ({config['category']}): {config['url']}")
+            category_docs = []
+            
+            # (1) URL 로드 (API 정보)
+            st.sidebar.text(f"URL 로딩 중 ({mode}): {config['url']}")
             loader = WebBaseLoader(config['url'])
-            loaded_docs = loader.load()
-            # 메타데이터에 카테고리 추가
-            for d in loaded_docs:
+            loaded_url = loader.load()
+            for d in loaded_url:
                 d.metadata["category"] = config["category"]
-            docs.extend(loaded_docs)
-        except Exception as e:
-            st.sidebar.warning(f"URL 로드 실패: {config['url']}")
-    
-    # 3. PDF 로드 (기본은 리포트 카테고리로 지정)
-    if pdf_path and os.path.exists(pdf_path):
-        try:
-            pdf_loader = PyPDFLoader(pdf_path)
-            loaded_pdf = pdf_loader.load()
-            for d in loaded_pdf:
-                d.metadata["category"] = "report"
-            docs.extend(loaded_pdf)
-        except Exception as e:
-            st.sidebar.error(f"PDF 로드 실패: {str(e)}")
-        
-    # 문서를 크게 쪼개기 (문맥 유지)
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=300)
-    splits = text_splitter.split_documents(docs)
-    
-    # 2. 리트리버 세팅
-    try:
-        # 키워드 기반 BM25 리트리버 (전체 데이터 기반)
-        bm25_retriever = BM25Retriever.from_documents(splits)
-        bm25_retriever.k = 10  
-        
-        # 의미 기반 Chroma 벡터 리트리버
-        vectorstore = Chroma.from_documents(
-            documents=splits,
-            embedding=HuggingFaceEmbeddings(
-                model_name="jhgan/ko-sroberta-multitask",
-                model_kwargs={'device': 'cpu'},
-                encode_kwargs={'normalize_embeddings': True}
-            ),
-            persist_directory=CHROMA_PERSIST_DIR
-        )
-        
-        # 🚀 랭체인 패키지 에러 우회! 직접 하이브리드 엔진 함수 생성
-        def custom_hybrid_search(query: str):
-            # 현재 선택된 모드 가져오기
-            current_mode = st.session_state.get("search_mode", "report")
+                d.metadata["source_type"] = "api"
+            category_docs.extend(loaded_url)
             
-            # 검색 엔진에서 각각 결과를 가져옴 (Chroma는 필터링 적용)
-            docs_bm25 = bm25_retriever.invoke(query)
-            docs_chroma = vectorstore.as_retriever(
-                search_kwargs={"k": 10, "filter": {"category": current_mode}}
-            ).invoke(query)
+            # (2) PDF 로드 (디자이너 정보)
+            pdf_path = config["pdf"]
+            if os.path.exists(pdf_path):
+                st.sidebar.text(f"PDF 로딩 중 ({mode}): {pdf_path}")
+                pdf_loader = PyPDFLoader(pdf_path)
+                loaded_pdf = pdf_loader.load()
+                for d in loaded_pdf:
+                    d.metadata["category"] = config["category"]
+                    d.metadata["source_type"] = "designer"
+                category_docs.extend(loaded_pdf)
+            else:
+                st.sidebar.warning(f"{mode}용 PDF 파일을 찾을 수 없습니다: {pdf_path}")
+
+            # (3) 쪼개기 (API 설명이 잘리지 않도록 크기 조정)
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+            splits = text_splitter.split_documents(category_docs)
             
-            # 중복 제거 및 필터링된 결과 결합!
-            merged_docs = []
+            # (4) 시스템 구축 (Chroma + BM25)
+            # BM25
+            bm25_retriever = BM25Retriever.from_documents(splits)
+            bm25_retriever.k = 15
+            
+            # Chroma (컬렉션 이름을 모드로 구분하여 완전 분리)
+            vectorstore = Chroma.from_documents(
+                documents=splits,
+                embedding=HuggingFaceEmbeddings(
+                    model_name="jhgan/ko-sroberta-multitask",
+                    model_kwargs={'device': 'cpu'},
+                    encode_kwargs={'normalize_embeddings': True}
+                ),
+                persist_directory=f"{CHROMA_PERSIST_DIR}_{mode}",
+                collection_name=f"clip_{mode}_v5"
+            )
+            
+            # (5) 하이브리드 엔진 조합
+            def build_hybrid_engine(bm25, vector):
+                def hybrid_search(query: str):
+                    docs_bm25 = bm25.invoke(query)
+                    docs_chroma = vector.as_retriever(search_kwargs={"k": 15}).invoke(query)
+                    
+                    merged = []
+                    seen = set()
+                    for d1, d2 in zip(docs_bm25 + [None]*15, docs_chroma + [None]*15):
+                        if d1 and d1.page_content not in seen:
+                            seen.add(d1.page_content)
+                            merged.append(d1)
+                        if d2 and d2.page_content not in seen:
+                            seen.add(d2.page_content)
+                            merged.append(d2)
+                    return merged[:20]
+                return RunnableLambda(hybrid_search)
+
+            retrievers[mode] = build_hybrid_engine(bm25_retriever, vectorstore)
+
+        except Exception as e:
+            st.sidebar.error(f"{mode} 엔진 구축 실패: {str(e)}")
+            retrievers[mode] = None
+
+    return retrievers
+
             seen_content = set()
             
             for d1, d2 in zip(docs_bm25 + [None]*10, docs_chroma + [None]*10):
@@ -319,16 +328,22 @@ if prompt_input := st.chat_input("질문을 입력하세요..."):
         st.markdown(prompt_input)
 
     with st.chat_message("assistant"):
-        pdf_path = "클립리포트 v5.0 매뉴얼.pdf"
-        retriever_engine = get_retriever(API_KEY, pdf_path)
+        # 물리적으로 분리된 리트리버 딕셔너리 가져오기
+        retriever_systems = get_retriever(API_KEY)
         
+        # 현재 모드에 맞는 시스템 선택
+        current_mode = st.session_state.get("search_mode", "report")
+        selected_retriever = retriever_systems.get(current_mode)
+        
+        if selected_retriever is None:
+            st.error(f"{current_mode} 엔진을 로드할 수 없습니다.")
+            st.stop()
+            
         with st.spinner("답변 생성 중..."):
             try:
-                # 현재 선택된 모드(search_mode)를 답변 생성 함수에 전달
-                current_mode = st.session_state.get("search_mode", "report")
                 p_name = "리포트(R5)" if current_mode == "report" else "이폼(E5)"
                 
-                answer = generate_answer(API_KEY, retriever_engine, prompt_input, current_mode)
+                answer = generate_answer(API_KEY, selected_retriever, prompt_input, current_mode)
                 
                 # 답변 하단에 출처 표시 추가 (사용자 확신 제공)
                 final_answer = f"{answer}\n\n---\n> 📍 **현재 답변은 [{p_name}] 문서를 바탕으로 작성되었습니다.**"
