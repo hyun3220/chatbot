@@ -108,7 +108,16 @@ else:
         .stMarkdown, .stMarkdown * {{
             color: #31333F !important;
         }}
-        /* 입력창 */
+        /* ★ 하단 입력바 전체 배경 (stBottom이 dark로 남던 원인) */
+        [data-testid="stBottom"],
+        [data-testid="stBottom"] > div,
+        [data-testid="stChatInputContainer"],
+        .stChatFloatingInputContainer,
+        .stChatInputContainer {{
+            background-color: #FFFFFF !important;
+            border-top: 1px solid rgba(0,0,0,0.07) !important;
+        }}
+        /* 입력창 textarea */
         [data-testid="stChatInput"] textarea,
         .stChatInputContainer textarea,
         [data-testid="stTextInput"] input {{
@@ -121,12 +130,13 @@ else:
             accent-color: #f97316 !important;
             filter: invert(0) !important;
         }}
-        /* 아이콘/화살표 버튼 */
-        [data-testid="stChatInputSubmitButton"] svg,
+        /* 제출 버튼 라이트모드 */
         [data-testid="stChatInputSubmitButton"] {{
-            color: #31333F !important;
-            stroke: #31333F !important;
-            filter: invert(1) brightness(0) !important;
+            background-color: #f97316 !important;
+        }}
+        [data-testid="stChatInputSubmitButton"] svg {{
+            fill: #FFFFFF !important;
+            stroke: #FFFFFF !important;
         }}
         /* 채팅 메시지 아이콘 */
         [data-testid="stChatMessageAvatarAssistant"] {{
@@ -154,10 +164,11 @@ st.markdown("""
             display: none !important; 
         }
 
-        /* (3) 메인 컨테이너 여백 조정 (위로 더 올림) */
+        /* (3) 메인 컨테이너 여백 조정 - 콘텐츠 위로 올림 */
         .main .block-container { 
-            padding-top: 0 !important; 
-            padding-bottom: 70px !important; /* iframe 50px 확장 보정 - 입력창 보호 */
+            padding-top: 0 !important;
+            margin-top: -20px !important;  /* 전체 콘텐츠를 위로 올림 */
+            padding-bottom: 70px !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
