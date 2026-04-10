@@ -37,11 +37,11 @@ st.markdown("""
         }
 
         /* (2) 스트림릿 기본 요소 완전 박멸 (Deep Hiding) */
-        header, footer, [data-testid="stHeader"], [data-testid="stFooter"], 
+        [data-testid="stHeader"], [data-testid="stFooter"], header, footer,
         .stAppHeader, .stAppFooter, [data-testid="stStatusWidget"], .stDecoration,
         .stActionButton, [data-testid="stToolbar"], [data-testid="stDecoration"],
         div[class^="st-emotion-cache-1vt4y6f"], div[class^="stCustomComponentV1"],
-        #managed-footer, .stApp [data-testid="stToolbar"] { 
+        #managed-footer, .stApp [data-testid="stToolbar"], footer a { 
             visibility: hidden !important; 
             display: none !important; 
             height: 0 !important;
@@ -50,10 +50,10 @@ st.markdown("""
             pointer-events: none !important;
         }
         
-        /* (3) 메인 배포 컨테이너 여백 (외부 헤더 -48px 당기기 보정값: 50px) */
+        /* (3) 메인 배포 컨테이너 여백 (상단/하단 여백 최소화) */
         .main .block-container { 
-            padding-top: 50px !important; 
-            padding-bottom: 30px !important;
+            padding-top: 0 !important; 
+            padding-bottom: 50px !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
