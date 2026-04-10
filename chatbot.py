@@ -23,32 +23,11 @@ import streamlit.components.v1 as components
 # 페이지 설정
 st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 
-# [핵심] 고정형 프리미엄 헤더 바 (최상단 선언으로 안정성 확보)
-st.markdown("""
-    <div style='
-        position: fixed; 
-        top: 0; 
-        left: 0; 
-        right: 0; 
-        background-color: #f97316; 
-        color: white; 
-        padding: 12px 20px; 
-        z-index: 100000; 
-        display: flex; 
-        align-items: center; 
-        gap: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    '>
-        <span style='font-size: 1.2rem;'>🤖</span>
-        <span style='font-weight: 700; font-size: 1rem;'>CLIP 챗봇 도우미</span>
-    </div>
-""", unsafe_allow_html=True)
-
-# CSS (사용자 기능 유지 + UI 버그 해결 버전)
+# CSS (임베디드 최적화 버전)
 st.markdown("""
     <style>
-        /* 1. 전체 가로 스크롤 차단 및 폰트 2포인트 축소 */
-        html, body {
+        /* (1) 가로 스크롤 완전 차단 및 기본 폰트 축소 */
+        html, body, [data-testid="stAppViewContainer"] {
             overflow-x: hidden !important;
             width: 100vw !important;
             margin: 0 !important;
@@ -57,9 +36,10 @@ st.markdown("""
             font-size: 13px !important;
         }
 
-        /* 2. 스트림릿 기본 요소 완전 제거 (푸터, 헤더 등) */
+        /* (2) 스트림릿 기본 요소 완전 박멸 (Deep Hiding) */
         header, footer, [data-testid="stHeader"], [data-testid="stFooter"], 
-        .stAppHeader, .stAppFooter, [data-testid="stStatusWidget"], .stDecoration { 
+        .stAppHeader, .stAppFooter, [data-testid="stStatusWidget"], .stDecoration,
+        .stActionButton, [data-testid="stToolbar"] { 
             visibility: hidden !important; 
             display: none !important; 
             height: 0 !important;
@@ -68,10 +48,15 @@ st.markdown("""
             pointer-events: none !important;
         }
         
-        /* 3. 메인 배포 컨테이너 여백 고정 (헤더 공간 확보) */
+        /* (3) 메인 배포 컨테이너 여백 (외부 헤더에 맞추어 상단 여백 제거) */
         .main .block-container { 
-            padding-top: 80px !important; 
+            padding-top: 5px !important; 
             padding-bottom: 30px !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            max-width: 100% !important;
+        }
+
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
@@ -355,26 +340,6 @@ def generate_answer(api_key, retriever, query, mode):
     return rag_chain.invoke(query)
 
 # UI 및 실행 로직
-# [FIX] 고정형 프리미엄 헤더 바
-st.markdown("""
-    <div style='
-        position: fixed; 
-        top: 0; 
-        left: 0; 
-        right: 0; 
-        background-color: #f97316; 
-        color: white; 
-        padding: 12px 20px; 
-        z-index: 100000; 
-        display: flex; 
-        align-items: center; 
-        gap: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    '>
-        <span style='font-size: 1.2rem;'>🤖</span>
-        <span style='font-weight: 700; font-size: 1rem;'>CLIP 챗봇 도우미</span>
-    </div>
-""", unsafe_allow_html=True)
 
 # [수정] 테마 대응형 슬림 선택기
 search_mode = st.radio(
