@@ -23,6 +23,59 @@ import streamlit.components.v1 as components
 # 페이지 설정
 st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 
+# ─────────────────────────────────────────────
+# 테마 읽기: chatbot.js가 URL에 ?theme=dark 또는 ?theme=light를 붙여서 전달
+# embed_options만으로는 세션 캐싱 문제로 반영이 안 될 수 있어 직접 CSS로 처리
+# ─────────────────────────────────────────────
+theme = st.query_params.get("theme", "dark")
+is_dark = (theme == "dark")
+
+# 테마별 색상 정의
+if is_dark:
+    bg_color        = "#0E1117"
+    secondary_bg    = "#262730"
+    text_color      = "#FAFAFA"
+    border_color    = "rgba(255,255,255,0.08)"
+    chat_bg         = "#1E1E2E"
+    input_bg        = "#1E1E2E"
+else:
+    bg_color        = "#FFFFFF"
+    secondary_bg    = "#F0F2F6"
+    text_color      = "#31333F"
+    border_color    = "rgba(0,0,0,0.08)"
+    chat_bg         = "#F8F9FA"
+    input_bg        = "#FFFFFF"
+
+# 테마 CSS 주입 (가장 먼저 적용되어야 함)
+st.markdown(f"""
+    <style>
+        html, body,
+        [data-testid="stAppViewContainer"],
+        [data-testid="stApp"],
+        .main {{
+            background-color: {bg_color} !important;
+            color: {text_color} !important;
+        }}
+        [data-testid="stChatMessage"],
+        [data-testid="stChatMessageContent"] {{
+            background-color: {chat_bg} !important;
+            color: {text_color} !important;
+        }}
+        .stMarkdown, .stMarkdown p {{
+            color: {text_color} !important;
+        }}
+        [data-testid="stChatInput"], [data-testid="stChatInputContainer"],
+        .stChatInputContainer textarea {{
+            background-color: {input_bg} !important;
+            color: {text_color} !important;
+        }}
+        div[data-testid="stRadio"] {{
+            background-color: {secondary_bg} !important;
+            border-color: {border_color} !important;
+        }}
+    </style>
+""", unsafe_allow_html=True)
+
 # CSS (임베디드 최적화 버전)
 st.markdown("""
     <style>
@@ -60,16 +113,15 @@ st.markdown("""
 
         /* (4) 슬림한 카드 디자인 및 위치 조정 */
         div[data-testid="stRadio"] {
-            background-color: var(--secondary-background-color) !important;
             border-radius: 10px !important;
-            padding: 8px 12px !important; /* 전체적인 패딩 축소 */
+            padding: 8px 12px !important;
             border: 1px solid rgba(128, 128, 128, 0.1) !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
-            margin: -25px 0 10px 0 !important; /* 위로 더 올림 */
+            margin: -25px 0 10px 0 !important;
         }
 
         div[data-testid="stRadio"] > label {
-            font-size: 11.5px !important; /* 폰트 살짝 축소 */
+            font-size: 11.5px !important;
             font-weight: 600 !important;
             margin-bottom: 6px !important;
             opacity: 0.9;
@@ -77,7 +129,7 @@ st.markdown("""
         }
 
         div[data-testid="stRadio"] div[role="radiogroup"] {
-            gap: 8px !important; /* 버튼 간격 소폭 축소 */
+            gap: 8px !important;
             display: flex;
             flex-direction: row;
         }
@@ -90,7 +142,7 @@ st.markdown("""
         /* 슬림한 버튼 스타일 */
         div[data-testid="stRadio"] div[role="radiogroup"] label {
             background-color: rgba(128, 128, 128, 0.08) !important;
-            padding: 4px 8px !important; /* 상하 패딩을 줄여서 아주 얇게 만듦 */
+            padding: 4px 8px !important;
             border-radius: 6px !important;
             flex: 1;
             display: flex;
@@ -99,14 +151,14 @@ st.markdown("""
             cursor: pointer !important;
             border: 1px solid transparent !important;
             transition: all 0.2s ease;
-            min-height: 28px !important; /* 최소 높이 설정으로 날렵하게 유지 */
+            min-height: 28px !important;
         }
 
         /* 한 줄 표시 및 텍스트 스타일 */
         div[data-testid="stRadio"] div[role="radiogroup"] label p {
-            font-size: 11.5px !important; /* 폰트 살짝 축소 */
+            font-size: 11.5px !important;
             margin: 0 !important;
-            white-space: nowrap !important; /* 절대 개행되지 않도록 설정 */
+            white-space: nowrap !important;
             overflow: visible !important;
         }
 
