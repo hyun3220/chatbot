@@ -28,96 +28,82 @@ st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 # CSS (크기 축소, 반투명 스크롤 버튼, 다크/라이트모드 충돌 해결, 푸터 제거 등 모두 포함)
 st.markdown("""
     <style>
-        .scroll-container {
-            position: fixed; bottom: 80px; right: 15px; z-index: 1000;
-            display: flex; flex-direction: column; gap: 8px;
+        /* 1. 전체 문서 가로 스크롤 완전 차단 */
+        html, body {
+            overflow-x: hidden !important;
+            width: 100vw !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            scroll-behavior: smooth;
         }
-        .scroll-link {
-            width: 32px; height: 32px; background-color: #4F4F4F; color: white !important;
-            border-radius: 50%; text-decoration: none !important; display: flex; 
-            align-items: center; justify-content: center; font-size: 14px; 
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.2); transition: all 0.3s ease; opacity: 0.3;
-        }
-        .scroll-link:hover {
-            background-color: #000000; transform: scale(1.1); opacity: 1;
-        }
-        html { scroll-behavior: smooth; }
-        html, body, [class*="css"] { font-size: 14px !important; line-height: 1.5 !important; }
-        .stMarkdown p, .stMarkdown li, .stChatInput textarea { font-size: 14px !important; }
-        .stButton button p { font-size: 13px !important; }
-        h1, h2, h3 { font-size: 1.2rem !important; }
-        header, footer { visibility: hidden !important; display: none !important; }
-        .block-container { padding: 1rem !important; }
 
-        /* [개선] 테마 대응형 슬림 카드 선택기 */
+        /* 2. 스트림릿 기본 요소 강제 숨김 (더 강력한 선택자) */
+        header, footer, [data-testid="stHeader"], [data-testid="stFooter"], .stAppHeader, .stAppFooter { 
+            visibility: hidden !important; 
+            display: none !important; 
+            height: 0 !important;
+        }
+        
+        /* 3. 메인 배포 컨테이너 여백 고정 (헤더 공간 확보) */
+        .main .block-container { 
+            padding-top: 80px !important; /* 헤더 높이만큼 확실히 띄움 */
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            max-width: 100% !important;
+        }
+
+        /* 4. 채팅 영역 가로 스크롤 방지 및 줄바꿈 강제 */
+        .stChatMessage, .stMarkdown {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-wrap: anywhere !important; /* 어떤 긴 문자열도 강제 줄바꿈 */
+            word-wrap: break-word !important;
+        }
+        
+        /* 코드 블록(Pre) 가로 넘침 방지 */
+        pre, code {
+            white-space: pre-wrap !important;
+            word-wrap: break-word !important;
+            overflow-x: hidden !important;
+        }
+
+        /* 5. 제품 선택 카드 디자인 및 위치 */
         div[data-testid="stRadio"] {
             background-color: var(--secondary-background-color);
             border-radius: 12px;
-            padding: 10px 14px !important;
+            padding: 12px 16px !important;
             border: 1px solid rgba(128, 128, 128, 0.1);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
+            margin: 10px 0 20px 0 !important;
         }
 
-        /* 라디오 버튼 제목 */
-        div[data-testid="stRadio"] > label {
-            font-size: 0.8rem !important;
-            font-weight: 600 !important;
-            color: var(--text-color) !important;
-            margin-bottom: 10px !important;
-            opacity: 0.7;
-            text-align: left;
-        }
-
-        /* 버튼 그룹 컨테이너 */
         div[data-testid="stRadio"] div[role="radiogroup"] {
-            gap: 10px !important;
+            gap: 12px !important;
             display: flex;
             flex-direction: row;
         }
 
-        /* 기본 라디오 원형 아이콘 숨기기 */
         div[data-testid="stRadio"] div[role="radiogroup"] [data-testid="stWidgetSelectionControl"] {
             display: none !important;
         }
 
-        /* 개별 버튼(칩) 스타일 */
         div[data-testid="stRadio"] div[role="radiogroup"] label {
-            background-color: rgba(128, 128, 128, 0.05) !important;
-            padding: 6px 15px !important;
+            background-color: rgba(128, 128, 128, 0.08) !important;
+            padding: 8px 12px !important;
             border-radius: 10px !important;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            min-width: fit-content !important;
-            white-space: nowrap !important;
             flex: 1;
             display: flex;
             justify-content: center;
-            border: 1px solid transparent !important;
             cursor: pointer !important;
-            margin: 0 !important;
         }
 
-        /* [핵심] 선택된 버튼 스타일 - 샥 이동하는 효과 */
         div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
             background-color: var(--background-color) !important;
-            border: 1.5px solid #f97316 !important; /* 주황색 강조 */
-            box-shadow: 0 4px 10px rgba(249, 115, 22, 0.15) !important;
+            border: 2px solid #f97316 !important;
             color: #f97316 !important;
-            font-weight: bold !important;
-            transform: translateY(-1px);
+            font-weight: 700 !important;
         }
-
-        /* 마우스 호버 효과 */
-        div[data-testid="stRadio"] div[role="radiogroup"] label:hover {
-            background-color: rgba(128, 128, 128, 0.1) !important;
-        }
-
-        /* 텍스트 정렬 */
-        div[data-testid="stRadio"] div[role="radiogroup"] label div[data-testid="stMarkdownContainer"] p {
-            font-size: 0.85rem !important;
-            margin: 0 !important;
-            text-align: center;
-        }
+    </style>
     </style>
 
 """, unsafe_allow_html=True)
@@ -328,7 +314,47 @@ def generate_answer(api_key, retriever, query, mode):
     return rag_chain.invoke(query)
 
 # UI 및 실행 로직
-st.title("")
+# [FIX] 고정형 프리미엄 헤더 바
+st.markdown("""
+    <div style='
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        right: 0; 
+        background-color: #f97316; 
+        color: white; 
+        padding: 12px 20px; 
+        z-index: 9999; 
+        display: flex; 
+        align-items: center; 
+        gap: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    '>
+        <span style='font-size: 1.2rem;'>🤖</span>
+        <span style='font-weight: 700; font-size: 1rem;'>CLIP 챗봇 도우미</span>
+    </div>
+""", unsafe_allow_html=True)
+
+# [FIX] 고정형 프리미엄 헤더 바 (최상단 고정 보장)
+st.markdown("""
+    <div style='
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        right: 0; 
+        background-color: #f97316; 
+        color: white; 
+        padding: 12px 20px; 
+        z-index: 99999; 
+        display: flex; 
+        align-items: center; 
+        gap: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    '>
+        <span style='font-size: 1.2rem;'>🤖</span>
+        <span style='font-weight: 700; font-size: 1rem;'>CLIP 챗봇 도우미</span>
+    </div>
+""", unsafe_allow_html=True)
 
 # [수정] 테마 대응형 슬림 선택기
 search_mode = st.radio(
