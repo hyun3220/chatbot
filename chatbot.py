@@ -51,9 +51,9 @@ st.markdown("""
             pointer-events: none !important;
         }
         
-        /* (3) 메인 배포 컨테이너 여백 (내부 최적화 버전) */
+        /* (3) 메인 배포 컨테이너 여백 (상단 수치 보정 - 헤더 당기기 대응) */
         .main .block-container { 
-            padding-top: 5px !important; 
+            padding-top: 55px !important; 
             padding-bottom: 50px !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
