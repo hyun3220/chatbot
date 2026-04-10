@@ -3,7 +3,7 @@ import streamlit as st
 import os
 
 # 환경 변수로 v1을 강제 고정
-#os.environ["GOOGLE_API_VERSION"] = "v1"
+os.environ["GOOGLE_API_VERSION"] = "v1"
 
 import google.generativeai as genai
 from langchain_core.output_parsers import StrOutputParser
