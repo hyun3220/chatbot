@@ -1,3 +1,4 @@
+# 상단 임포트 부분 수정 (기존꺼 다 지우고 이걸로 바꿔주세요)
 import streamlit as st
 import os
 
@@ -11,12 +12,14 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_core.runnables import RunnablePassthrough
+
+# 👉 추가된 부분: RunnableLambda 추가
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.output_parsers import StrOutputParser
 
-# 🚀 하이브리드 검색(키워드+벡터)을 위한 라이브러리 추가
+# 👉 말썽 피우던 EnsembleRetriever는 빼버리고, BM25만 놔둡니다!
 from langchain_community.retrievers import BM25Retriever
-from langchain.retrievers import EnsembleRetriever
+
 
 # 페이지 설정
 st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
@@ -74,41 +77,76 @@ except KeyError:
     st.error("서버에 API 키가 설정되지 않았습니다.")
     st.stop()
 
-# 🚀 문서 학습 로직 (청크 조절 & 앙상블 리트리버 적용)
 @st.cache_resource
-def get_retriever(api_key, pdf_path):
-    os.environ["GOOGLE_API_KEY"] = api_key
-    embeddings = HuggingFaceEmbeddings(model_name="jhgan/ko-sroberta-multitask")
-
-    if not os.path.exists(pdf_path):
-        st.error(f"'{pdf_path}' 파일이 없습니다.")
-        st.stop()
-
-    pdf_loader = PyPDFLoader(pdf_path)
-    all_docs = pdf_loader.load()
-
-    # 웹 데이터 추가
-    try:
-        web_loader = WebBaseLoader("https://technet.hancomins.com/board/api/R5/symbols/ReportView.html")
-        all_docs += web_loader.load()
-    except Exception as e:
-        print("Web Load Error:", e)
-
-    # 설명이 짤리지 않게 청크 사이즈 확대 (1000->1500)
+def get_retriever():
+    CHROMA_PERSIST_DIR = "./chroma_db"
+    
+    # 1. 문서 로드 및 분할 (기존과 동일)
+    urls = [
+        "https://clipdocs.com/api"
+    ]
+    docs = []
+    
+    # 웹 페이지 로드
+    for url in urls:
+        st.sidebar.text(f"URL 로딩 중: {url}")
+        loader = WebBaseLoader(url)
+        docs.extend(loader.load())
+    
+    # PDF 로드 (파일이 있는 경우에만 처리)
+    if os.path.exists('clipreport.pdf'):
+        st.sidebar.text("PDF 로딩 중: clipreport.pdf")
+        pdf_loader = PyPDFLoader('clipreport.pdf')
+        docs.extend(pdf_loader.load())
+        
+    # 문서를 크게 쪼개기 (문맥 유지)
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=300)
-    splits = text_splitter.split_documents(all_docs)
+    docs = text_splitter.split_documents(docs)
+    
+    # 2. 리트리버 세팅
+    try:
+        # 키워드 기반 BM25 리트리버
+        bm25_retriever = BM25Retriever.from_documents(docs)
+        bm25_retriever.k = 10  
+        
+        # 의미 기반 Chroma 벡터 리트리버
+        vectorstore = Chroma.from_documents(
+            documents=docs,
+            embedding=HuggingFaceEmbeddings(
+                model_name="jhgan/ko-sroberta-multitask",
+                model_kwargs={'device': 'cpu'},
+                encode_kwargs={'normalize_embeddings': True}
+            ),
+            persist_directory=CHROMA_PERSIST_DIR
+        )
+        chroma_retriever = vectorstore.as_retriever(search_kwargs={"k": 10})
+        
+        # 🚀 랭체인 패키지 에러 우회! 직접 하이브리드 엔진 함수 생성
+        def custom_hybrid_search(query: str):
+            # 두 검색 엔진에서 각각 결과를 가져옴
+            docs_bm25 = bm25_retriever.invoke(query)
+            docs_chroma = chroma_retriever.invoke(query)
+            
+            # 중복을 없애고 두 결과를 지퍼(zip)처럼 교차 결합!
+            merged_docs = []
+            seen_content = set()
+            
+            for d1, d2 in zip(docs_bm25 + [None]*10, docs_chroma + [None]*10):
+                if d1 and d1.page_content not in seen_content:
+                    seen_content.add(d1.page_content)
+                    merged_docs.append(d1)
+                if d2 and d2.page_content not in seen_content:
+                    seen_content.add(d2.page_content)
+                    merged_docs.append(d2)
+                    
+            return merged_docs[:15] # 상위 15개 텍스트 리턴
 
-    # 1. 크로마(벡터) 검색엔진 - 한 번에 검색해올 조각을 20개로 확대
-    vector_retriever = Chroma.from_documents(documents=splits, embedding=embeddings).as_retriever(search_kwargs={"k": 20})
-    
-    # 2. BM25(키워드 완전일치) 검색엔진
-    bm25_retriever = BM25Retriever.from_documents(splits)
-    bm25_retriever.k = 20
-    
-    # 3. 위 둘을 5:5 비율로 혼합 (하이브리드 엔진)
-    ensemble_retriever = EnsembleRetriever(retrievers=[bm25_retriever, vector_retriever], weights=[0.5, 0.5])
-    
-    return ensemble_retriever
+        # 만든 무적 함수를 Runnable로 던져줍니다!
+        return RunnableLambda(custom_hybrid_search)
+        
+    except Exception as e:
+        st.error(f"벡터 DB 초기화 오류: {e}")
+        return None
 
 # 답변 생성 로직
 def generate_answer(api_key, retriever, query):
