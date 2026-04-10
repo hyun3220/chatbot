@@ -235,9 +235,9 @@ def get_retriever(API_KEY, pdf_path):
         return None
 
 # 답변 생성 로직
-def generate_answer(api_key, retriever, query):
+def generate_answer(api_key, retriever, query, mode):
     llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash", google_api_key=api_key, temperature=0,
+        model="gemini-1.5-flash-latest", google_api_key=api_key, temperature=0,
         #model="gemini-3-flash", google_api_key=api_key, temperature=0,
         safety_settings={
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
@@ -247,9 +247,14 @@ def generate_answer(api_key, retriever, query):
         }
     )
 
+    # 모드에 따른 명칭 설정
+    product_name = "클립리포트(CLIP report v5.0)" if mode == "report" else "클립이폼(CLIP eForm v5.0)"
+
     system_prompt = (
-        "당신은 고객님의 모호한 질문을 공식 API 명칭으로 변환하여 답변하는 **천재적인 매핑 엔지니어**입니다.\n\n"
-        "🔍 [문맥 추론 규칙]:\n"
+        f"당신은 현재 **[{product_name}]** 기술 문서를 기반으로 답변하는 전문 엔지니어입니다.\n"
+        f"대화 기록에 다른 제품(예: 리포트 또는 이폼)의 내용이 있더라도, 이번 질문에는 반드시 현재 모드인 **[{product_name}]**의 context 정보만 사용하세요.\n"
+        "만약 context에 해당 기능에 대한 정보가 없다면, 다른 제품의 지식을 빌려 답변하지 말고 정중히 모른다고 답변하세요.\n\n"
+        "🔍 [문맥 추론 및 매핑 규칙]:\n"
         "- 고객님이 '순서 바꾸기', '위치 변경'이라고 말하면: 'Order', 'Index', 'Sequence', 'Sort' 관련 함수를 검색하세요.\n"
         "- 고객님이 '저장 옵션', '내보내기 설정'이라고 말하면: 'Save', 'Export', 'Format' 관련 함수를 검색하세요.\n"
         "- 고객님이 '안 보여주기', '숨기기'라고 말하면: 'Visible', 'Display', 'Hide' 관련 함수를 검색하세요.\n\n"    
@@ -319,9 +324,17 @@ if prompt_input := st.chat_input("질문을 입력하세요..."):
         
         with st.spinner("답변 생성 중..."):
             try:
-                answer = generate_answer(API_KEY, retriever_engine, prompt_input)
-                st.markdown(answer)
-                st.session_state.messages.append({"role": "assistant", "content": answer})
+                # 현재 선택된 모드(search_mode)를 답변 생성 함수에 전달
+                current_mode = st.session_state.get("search_mode", "report")
+                p_name = "리포트(R5)" if current_mode == "report" else "이폼(E5)"
+                
+                answer = generate_answer(API_KEY, retriever_engine, prompt_input, current_mode)
+                
+                # 답변 하단에 출처 표시 추가 (사용자 확신 제공)
+                final_answer = f"{answer}\n\n---\n> 📍 **현재 답변은 [{p_name}] 문서를 바탕으로 작성되었습니다.**"
+                
+                st.markdown(final_answer)
+                st.session_state.messages.append({"role": "assistant", "content": final_answer})
             except Exception as e:
                 error_msg = "현재 API 서버에 문제가 있어 답변을 할 수 없습니다. 관리자에게 문의해 주시기 바랍니다."
                 #st.error(error_msg)
