@@ -17,6 +17,7 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 
 from langchain_community.retrievers import BM25Retriever
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+import streamlit.components.v1 as components
 
 
 # 페이지 설정
@@ -253,6 +254,44 @@ def generate_answer(api_key, retriever, query, mode):
     # 모드에 따른 명칭 설정
     product_name = "클립리포트(CLIP report v5.0)" if mode == "report" else "클립이폼(CLIP eForm v5.0)"
 
+    # 제품별 코드 템플릿 정의
+    if mode == "report":
+        code_template = (
+            "--- [웹 뷰어 스크립트 템플릿 (Report)] ---\n"
+            "<!DOCTYPE html>\n<html>\n<head>\n<script type='text/javascript'>\n"
+            "var report;\nfunction html2xml(divPath){{\n"
+            "    var reportkey = \"<%=resultKey%>\";\n"
+            "    report = createReport(\"./report_server.jsp\", reportkey, document.getElementById(divPath));\n"
+            "    \n    // 👇 여기에 질문한 API 적용 (예: report.print();)\n"
+            "    \n    report.view();\n}}\n"
+            "</script>\n</head>\n<body><div id='targetDiv1'></div></body>\n</html>\n"
+            "--- [템플릿 끝] ---"
+        )
+    else:
+        code_template = (
+            "--- [웹 뷰어 스크립트 템플릿 (eForm)] ---\n"
+            "<!DOCTYPE html>\n<html>\n<head>\n<script type='text/javascript'>\n"
+            "var urlPath = document.location.protocol + \"//\" + document.location.host;\n"
+            "var eformkey, eform;\n\n"
+            "function html2xml(divPath){{\n"
+            "    eformkey = \"<%=resultKey%>\";\n"
+            "    eform = createImportJSPEForm(\"./Clip.jsp\", eformkey, document.getElementById(divPath));\n"
+            "    \n"
+            "    eform.setStyle(\"close_button\",\"display:none;\");\n"
+            "    eform.setStyle(\"save_button\",\"right:10px;\");\n"
+            "    eform.setNecessaryEnabled(true);\n"
+            "    \n"
+            "    // 👇 여기에 질문한 API 적용 (예: eform.setSaveConfirmOpen(true);)\n"
+            "    \n"
+            "    eform.view();\n"
+            "}}\n"
+            "</script>\n</head>\n"
+            "<body onload=\"html2xml('targetDiv1')\">\n"
+            "<div id='targetDiv1' style='position:absolute;top:5px;left:5px;right:5px;bottom:5px;'></div>\n"
+            "</body>\n</html>\n"
+            "--- [템플릿 끝] ---"
+        )
+
     system_prompt = (
         f"당신은 현재 **[{product_name}]** 기술 문서를 기반으로 답변하는 전문 엔지니어입니다.\n"
         f"대화 기록에 다른 제품(예: 리포트 또는 이폼)의 내용이 있더라도, 이번 질문에는 반드시 현재 모드인 **[{product_name}]**의 context 정보만 사용하세요.\n"
@@ -274,16 +313,9 @@ def generate_answer(api_key, retriever, query, mode):
         "고객님이 무엇을 물어보든 항상 아래 순서로 답변하세요.\n"
         "1️⃣ **기능 요약**: 질문한 기능에 대한 짧은 정의\n"
         "2️⃣ **핵심 API**: 정확한 함수명과 파라미터 설명\n"
-        "3️⃣ **전체 예시 코드**: 제공된 [웹 뷰어 스크립트 템플릿]을 활용한 완성된 HTML 코드\n"
+        "3️⃣ **전체 예시 코드**: 아래 제공된 [제품별 웹 뷰어 스크립트 템플릿]에 질문한 API를 적용한 완성된 HTML 코드를 제공하세요.\n"
         "4️⃣ **주의 사항**: 해당 API 사용 시 개발자가 자주 실수하는 부분이나 팁\n\n"
-        "--- [웹 뷰어 스크립트 템플릿] ---\n"
-        "<!DOCTYPE html>\n<html>\n<head>\n<script type='text/javascript'>\n"
-        "var report;\nfunction html2xml(divPath){{\n"
-        "    var reportkey = \"<%=resultKey%>\";\n"
-        "    report = createReport(\"./report_server.jsp\", reportkey, document.getElementById(divPath));\n"
-        "    \n    // 👇 여기에 질문한 API 적용\n    \n    report.view();\n}}\n"
-        "</script>\n</head>\n<body><div id='targetDiv1'></div></body>\n</html>\n"
-        "--- [템플릿 끝] ---\n\n"
+        f"{code_template}\n\n"
         "문서에 없는 내용은 절대 지어내지 마세요. 모르는 내용은 '매뉴얼에서 해당 내용을 찾을 수 없으니 공식 기술 지원팀에 문의해 주세요'라고 안내하세요.\n\n"
         "Context:\n{context}"
     )
@@ -344,6 +376,16 @@ if prompt_input := st.chat_input("질문을 입력하세요..."):
                 
                 st.markdown(final_answer, unsafe_allow_html=True)
                 st.session_state.messages.append({"role": "assistant", "content": final_answer})
+                
+                # 답변 후 맨 아래로 부드럽게 이동
+                components.html(
+                    """
+                    <script>
+                        window.parent.document.getElementById('bottom-anchor').scrollIntoView({behavior: 'smooth'});
+                    </script>
+                    """,
+                    height=0,
+                )
             except Exception as e:
                 error_msg = "현재 API 서버에 문제가 있어 답변을 할 수 없습니다. 관리자에게 문의해 주시기 바랍니다."
                 #st.error(error_msg)
@@ -351,4 +393,5 @@ if prompt_input := st.chat_input("질문을 입력하세요..."):
                 print(f"DEBUG ERROR: {str(e)}")
                 st.session_state.messages.append({"role": "assistant", "content": error_msg})
 
-#st.markdown("<div id='bottom-anchor'></div>", unsafe_allow_html=True)
+# 맨 아래 앵커 추가
+st.markdown("<div id='bottom-anchor'></div>", unsafe_allow_html=True)
