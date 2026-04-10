@@ -237,7 +237,7 @@ def generate_answer(api_key, vectorstore, query):
 
 # UI 및 실행 로직
 #st.title(" 🤖 CLIP Report 5.0 전문 챗봇")
-st.title("")
+#st.title("")
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "무엇을 도와드릴까요?"}]
 
