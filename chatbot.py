@@ -42,7 +42,8 @@ st.markdown("""
         .stActionButton, [data-testid="stToolbar"], [data-testid="stDecoration"],
         div[class^="st-emotion-cache-1vt4y6f"], div[class^="stCustomComponentV1"],
         #managed-footer, .stApp [data-testid="stToolbar"], footer a,
-        .stAppHeader, .stAppViewContainer [data-testid="stHeader"] { 
+        .stAppHeader, .stAppViewContainer [data-testid="stHeader"],
+        .stToolbar, div[data-testid="stStatusWidget"], div[data-testid="stToolbar"] { 
             visibility: hidden !important; 
             display: none !important; 
             height: 0 !important;
@@ -54,10 +55,16 @@ st.markdown("""
         /* (3) 메인 컨테이너 여백 (입력창 보호 및 푸터 밀어내기) */
         .main .block-container { 
             padding-top: 0 !important; 
-            padding-bottom: 100px !important; /* 푸터가 입력창 위로 올라오지 못하게 충분한 공간 확보 */
+            padding-bottom: 50px !important; /* 여백 최적화 */
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
+        }
+
+        /* 첫 번째 섹션 상단 마진 제거 */
+        [data-testid="stVerticalBlock"] > div:first-child {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
         }
 
         /* 4. 채팅 영역 가로 고정 및 줄바꿈 강제 */
@@ -83,7 +90,7 @@ st.markdown("""
             padding: 8px 12px !important;
             border: 1px solid rgba(128, 128, 128, 0.1);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            margin: 5px 0 15px 0 !important;
+            margin: 0px 0 10px 0 !important; /* 위쪽 여백 제거하여 위로 올림 */
         }
 
         div[data-testid="stRadio"] > label {
