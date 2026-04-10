@@ -24,7 +24,7 @@ from langchain_community.retrievers import BM25Retriever
 # 페이지 설정
 st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 
-st.markdown("<div id='top-anchor'></div>", unsafe_allow_html=True)
+#st.markdown("<div id='top-anchor'></div>", unsafe_allow_html=True)
 
 # CSS (크기 축소, 반투명 스크롤 버튼, 다크/라이트모드 충돌 해결, 푸터 제거 등 모두 포함)
 st.markdown("""
@@ -50,10 +50,7 @@ st.markdown("""
         header, footer { visibility: hidden !important; display: none !important; }
         .block-container { padding: 1rem !important; }
     </style>
-    <div class="scroll-container">
-        <a href="#top-anchor" class="scroll-link" title="맨 위로">▲</a>
-        <a href="#bottom-anchor" class="scroll-link" title="맨 아래로">▼</a>
-    </div>
+
 """, unsafe_allow_html=True)
 
 # ==========================================
@@ -230,4 +227,4 @@ if prompt_input := st.chat_input("질문을 입력하세요..."):
                 print(f"DEBUG ERROR: {str(e)}")
                 st.session_state.messages.append({"role": "assistant", "content": error_msg})
 
-st.markdown("<div id='bottom-anchor'></div>", unsafe_allow_html=True)
+#st.markdown("<div id='bottom-anchor'></div>", unsafe_allow_html=True)
