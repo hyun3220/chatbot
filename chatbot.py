@@ -81,7 +81,8 @@ def get_retriever(API_KEY, pdf_path):
     
     # 2. 테크넷 URL 설정
     urls = [
-        "https://technet.hancomins.com/board/api/R5/symbols/ReportView.html"
+        "https://technet.hancomins.com/board/api/R5/symbols/ReportView.html",
+        "https://technet.hancomins.com/board/api/E5/symbols/Report.html"
     ]
     
     # 웹 페이지 로드
