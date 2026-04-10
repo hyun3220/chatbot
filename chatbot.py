@@ -48,48 +48,57 @@ st.markdown("""
         header, footer { visibility: hidden !important; display: none !important; }
         .block-container { padding: 1rem !important; }
 
-        /* [추가] 프리미엄 카드 선택기 스타일 */
-        .selector-card {
-            background-color: #ffffff;
-            border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 24px rgba(149, 157, 165, 0.15);
-            border: 1px solid #f0f0f0;
-            text-align: center;
-        }
-        
-        /* 스트림릿 라디오 버튼을 칩(Chip) 형태로 변형 */
-        div[data-testid="stRadio"] > label {
-            font-weight: 600 !important;
-            color: #4b5563 !important;
-            margin-bottom: 12px !important;
-            display: block !important;
-        }
-        div[data-testid="stRadio"] div[role="radiogroup"] {
-            background-color: #f3f4f6;
-            padding: 4px;
+        /* [개선] 테마 대응형 슬림 카드 선택기 */
+        div[data-testid="stRadio"] {
+            background-color: var(--secondary-background-color);
             border-radius: 12px;
-            gap: 4px !important;
+            padding: 8px 12px !important;
+            border: 1px solid rgba(128, 128, 128, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 15px;
         }
+
+        /* 라디오 버튼 제목 스타일 (얇게) */
+        div[data-testid="stRadio"] > label {
+            font-size: 0.85rem !important;
+            font-weight: 600 !important;
+            color: var(--text-color) !important;
+            margin-bottom: 8px !important;
+            opacity: 0.8;
+        }
+
+        /* 버튼 그룹 컨테이너 */
+        div[data-testid="stRadio"] div[role="radiogroup"] {
+            gap: 8px !important;
+            justify-content: space-between;
+        }
+
+        /* 개별 버튼(칩) 스타일 */
         div[data-testid="stRadio"] div[role="radiogroup"] label {
             background-color: transparent !important;
-            border: none !important;
-            padding: 8px 20px !important;
-            border-radius: 10px !important;
-            margin: 0 !important;
-            transition: all 0.3s ease !important;
+            padding: 5px 12px !important;
+            border-radius: 8px !important;
+            transition: all 0.2s ease !important;
+            min-width: fit-content !important;
+            white-space: nowrap !important; /* 글자 줄바꿈 방지 */
             flex: 1;
+            display: flex;
             justify-content: center;
+            border: 1px solid transparent !important;
         }
-        div[data-testid="stRadio"] div[role="radiogroup"] label[data-baseweb="radio"] {
-            background-color: transparent !important;
-        }
-        /* 선택된 버튼 스타일 */
+
+        /* 선택된 버튼 스타일 (테마 대응) */
         div[data-testid="stRadio"] div[role="radiogroup"] label:has(input[checked]) {
-            background-color: #ffffff !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
-            color: #f97316 !important; /* 주황색 포인트 */
+            background-color: var(--background-color) !important;
+            border: 1px solid rgba(249, 115, 22, 0.3) !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important;
+            color: #f97316 !important;
+        }
+        
+        /* 숨겨진 라이오 버튼 동그라미 제거 */
+        div[data-testid="stRadio"] div[role="radiogroup"] div[data-testid="stMarkdownContainer"] p {
+            font-size: 0.85rem !important;
+            margin: 0 !important;
         }
     </style>
 
@@ -264,21 +273,19 @@ def generate_answer(api_key, retriever, query):
 # UI 및 실행 로직
 st.title("")
 
-# [변경] 상단 카드형 선택기 적용
-st.markdown("<div class='selector-card'>", unsafe_allow_html=True)
+# [수정] 테마 대응형 슬림 선택기
 search_mode = st.radio(
     "어떤 제품에 대해 궁금하신가요?", 
     ["리포트(R5)", "이폼(E5)"], 
     index=0,
     horizontal=True
 )
-st.markdown("</div>", unsafe_allow_html=True)
 
 # 세션 상태 저장
 st.session_state.search_mode = "report" if "리포트" in search_mode else "eform"
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "안녕하세요. 무엇을 도와드릴까요?"}]
+    st.session_state.messages = [{"role": "assistant", "content": "무엇을 도와드릴까요?"}]
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
