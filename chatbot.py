@@ -46,35 +46,95 @@ else:
     chat_bg         = "#F8F9FA"
     input_bg        = "#FFFFFF"
 
-# 테마 CSS 주입 (가장 먼저 적용되어야 함)
-st.markdown(f"""
-    <style>
-        html, body,
-        [data-testid="stAppViewContainer"],
-        [data-testid="stApp"],
-        .main {{
-            background-color: {bg_color} !important;
-            color: {text_color} !important;
+# 테마 CSS 주입 - Streamlit 전체 CSS 변수를 루트 레벨에서 완전 재정의
+# embed_options 세션 캐싱 문제를 우회하여 모든 컴포넌트에 즉시 적용
+if is_dark:
+    theme_css = f"""
+        :root, [data-testid="stApp"] {{
+            color-scheme: dark;
         }}
+        html, body, [data-testid="stApp"],
+        [data-testid="stAppViewContainer"], .main {{
+            background-color: #0E1117 !important;
+            color: #FAFAFA !important;
+        }}
+        /* 보조 배경 (카드, 사이드바 등) */
+        [data-testid="stSidebar"],
         [data-testid="stChatMessage"],
-        [data-testid="stChatMessageContent"] {{
-            background-color: {chat_bg} !important;
-            color: {text_color} !important;
-        }}
-        .stMarkdown, .stMarkdown p {{
-            color: {text_color} !important;
-        }}
-        [data-testid="stChatInput"], [data-testid="stChatInputContainer"],
-        .stChatInputContainer textarea {{
-            background-color: {input_bg} !important;
-            color: {text_color} !important;
-        }}
         div[data-testid="stRadio"] {{
-            background-color: {secondary_bg} !important;
-            border-color: {border_color} !important;
+            background-color: #262730 !important;
         }}
-    </style>
-""", unsafe_allow_html=True)
+        /* 텍스트 전체 */
+        p, span, label, div, h1, h2, h3, h4, h5, h6,
+        .stMarkdown, .stMarkdown * {{
+            color: #FAFAFA !important;
+        }}
+        /* 입력창 */
+        [data-testid="stChatInput"] textarea,
+        .stChatInputContainer textarea,
+        [data-testid="stTextInput"] input {{
+            background-color: #262730 !important;
+            color: #FAFAFA !important;
+            border-color: rgba(255,255,255,0.1) !important;
+        }}
+        /* 라디오 버튼 accent */
+        input[type="radio"] {{
+            accent-color: #f97316 !important;
+            filter: invert(0) !important;
+        }}
+        /* 아이콘/화살표 버튼 */
+        [data-testid="stChatInputSubmitButton"] {{
+            filter: invert(0) !important;
+        }}
+    """
+else:
+    theme_css = f"""
+        :root, [data-testid="stApp"] {{
+            color-scheme: light;
+        }}
+        html, body, [data-testid="stApp"],
+        [data-testid="stAppViewContainer"], .main {{
+            background-color: #FFFFFF !important;
+            color: #31333F !important;
+        }}
+        /* 보조 배경 (카드, 사이드바 등) */
+        [data-testid="stSidebar"],
+        [data-testid="stChatMessage"],
+        div[data-testid="stRadio"] {{
+            background-color: #F0F2F6 !important;
+        }}
+        /* 텍스트 전체 */
+        p, span, label, div, h1, h2, h3, h4, h5, h6,
+        .stMarkdown, .stMarkdown * {{
+            color: #31333F !important;
+        }}
+        /* 입력창 */
+        [data-testid="stChatInput"] textarea,
+        .stChatInputContainer textarea,
+        [data-testid="stTextInput"] input {{
+            background-color: #F0F2F6 !important;
+            color: #31333F !important;
+            border-color: rgba(0,0,0,0.1) !important;
+        }}
+        /* 라디오 버튼 accent */
+        input[type="radio"] {{
+            accent-color: #f97316 !important;
+            filter: invert(0) !important;
+        }}
+        /* 아이콘/화살표 버튼 */
+        [data-testid="stChatInputSubmitButton"] svg,
+        [data-testid="stChatInputSubmitButton"] {{
+            color: #31333F !important;
+            stroke: #31333F !important;
+            filter: invert(1) brightness(0) !important;
+        }}
+        /* 채팅 메시지 아이콘 */
+        [data-testid="stChatMessageAvatarAssistant"] {{
+            background-color: #FF6B35 !important;
+        }}
+    """
+
+st.markdown(f"<style>{theme_css}</style>", unsafe_allow_html=True)
 
 # CSS (임베디드 최적화 버전)
 st.markdown("""
