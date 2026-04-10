@@ -76,11 +76,13 @@ except KeyError:
 def get_retriever(API_KEY, pdf_path):
     CHROMA_PERSIST_DIR = "./chroma_db"
     
-    # 1. 문서 로드 및 분할 (기존과 동일)
+     # 1. 문서 보관할 리스트 초기화
+    docs = [] 
+    
+    # 2. 테크넷 URL 설정
     urls = [
-        "https://clipdocs.com/api"
+        "https://technet.hancomins.com/board/api/R5/symbols/ReportView.html"
     ]
-    docs = []
     
     # 웹 페이지 로드
     for url in urls:
@@ -88,11 +90,16 @@ def get_retriever(API_KEY, pdf_path):
         loader = WebBaseLoader(url)
         docs.extend(loader.load())
     
-    # PDF 로드 (파일이 있는 경우에만 처리)
-    if os.path.exists('clipreport.pdf'):
-        st.sidebar.text("PDF 로딩 중: clipreport.pdf")
-        pdf_loader = PyPDFLoader('clipreport.pdf')
-        docs.extend(pdf_loader.load())
+   # 3. PDF 로드 (사용자님이 지정하신 파일명 확인)
+    # 전달받은 pdf_path에 "클립리포트 v5.0 매뉴얼.pdf"가 들어옵니다.
+    if pdf_path and os.path.exists(pdf_path):
+        try:
+            pdf_loader = PyPDFLoader(pdf_path)
+            docs.extend(pdf_loader.load())
+        except Exception as e:
+            st.sidebar.error(f"PDF 로드 실패: {str(e)}")
+    else:
+        st.sidebar.warning(f"PDF 파일을 찾을 수 없습니다: {pdf_path}")
         
     # 문서를 크게 쪼개기 (문맥 유지)
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=300)
