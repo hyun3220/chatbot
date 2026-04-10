@@ -71,7 +71,7 @@ except KeyError:
     st.stop()
 
 @st.cache_resource
-def get_retriever(api_key, pdf_file_path):
+def get_retriever(API_KEY, pdf_path):
     CHROMA_PERSIST_DIR = "./chroma_db"
     
     # 1. 문서 로드 및 분할 (기존과 동일)
