@@ -237,31 +237,10 @@ def get_retriever(API_KEY):
 
     return retrievers
 
-            seen_content = set()
-            
-            for d1, d2 in zip(docs_bm25 + [None]*10, docs_chroma + [None]*10):
-                # BM25 결과 중에서 현재 선택된 카테고리인 것만 필터링
-                if d1 and d1.metadata.get("category") == current_mode and d1.page_content not in seen_content:
-                    seen_content.add(d1.page_content)
-                    merged_docs.append(d1)
-                
-                # Chroma 결과 (이미 필터링됨) 결합
-                if d2 and d2.page_content not in seen_content:
-                    seen_content.add(d2.page_content)
-                    merged_docs.append(d2)
-                    
-            return merged_docs[:15]
-
-        return RunnableLambda(custom_hybrid_search)
-        
-    except Exception as e:
-        st.error(f"벡터 DB 초기화 오류: {e}")
-        return None
-
 # 답변 생성 로직
 def generate_answer(api_key, retriever, query, mode):
     llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash", google_api_key=api_key, temperature=0,
+        model="gemini-1.5-flash-latest", google_api_key=api_key, temperature=0,
         #model="gemini-3-flash", google_api_key=api_key, temperature=0,
         safety_settings={
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
