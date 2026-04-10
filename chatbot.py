@@ -3,7 +3,7 @@ import streamlit as st
 import os
 
 # 환경 변수로 v1을 강제 고정
-os.environ["GOOGLE_API_VERSION"] = "v1"
+#os.environ["GOOGLE_API_VERSION"] = "v1"
 
 import google.generativeai as genai
 from langchain_core.output_parsers import StrOutputParser
@@ -153,7 +153,7 @@ def get_retriever(API_KEY, pdf_path):
 # 답변 생성 로직
 def generate_answer(api_key, retriever, query):
     llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash", google_api_key=api_key, temperature=0,
+        model="gemini-1.5-flash-latest", google_api_key=api_key, temperature=0,
         safety_settings={
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
             HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
