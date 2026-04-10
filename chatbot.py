@@ -241,7 +241,7 @@ def get_retriever(API_KEY):
 # 답변 생성 로직
 def generate_answer(api_key, retriever, query, mode):
     llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash-latest", google_api_key=api_key, temperature=0,
+        model="gemini-2.5-flash", google_api_key=api_key, temperature=0,
         #model="gemini-3-flash", google_api_key=api_key, temperature=0,
         safety_settings={
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
