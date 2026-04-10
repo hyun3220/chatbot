@@ -23,6 +23,27 @@ import streamlit.components.v1 as components
 # 페이지 설정
 st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 
+# [핵심] 고정형 프리미엄 헤더 바 (최상단 선언으로 안정성 확보)
+st.markdown("""
+    <div style='
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        right: 0; 
+        background-color: #f97316; 
+        color: white; 
+        padding: 12px 20px; 
+        z-index: 100000; 
+        display: flex; 
+        align-items: center; 
+        gap: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    '>
+        <span style='font-size: 1.2rem;'>🤖</span>
+        <span style='font-weight: 700; font-size: 1rem;'>CLIP 챗봇 도우미</span>
+    </div>
+""", unsafe_allow_html=True)
+
 #st.markdown("<div id='top-anchor'></div>", unsafe_allow_html=True)
 
 # CSS (크기 축소, 반투명 스크롤 버튼, 다크/라이트모드 충돌 해결, 푸터 제거 등 모두 포함)
@@ -38,16 +59,21 @@ st.markdown("""
             font-size: 13px !important; /* 전체적으로 2포인트 축소 */
         }
 
-        /* 2. 스트림릿 기본 요소 강제 숨김 */
-        header, footer, [data-testid="stHeader"], [data-testid="stFooter"], .stAppHeader, .stAppFooter { 
+        /* 2. 스트림릿 기본 요소 완전 박멸 (Deep Hiding) */
+        header, footer, [data-testid="stHeader"], [data-testid="stFooter"], 
+        .stAppHeader, .stAppFooter, [data-testid="stStatusWidget"], .stDecoration { 
             visibility: hidden !important; 
             display: none !important; 
             height: 0 !important;
+            width: 0 !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
         
-        /* 3. 메인 배포 컨테이너 여백 고정 (헤더 공간 확보) */
+        /* 3. 메인 배포 컨테이너 여백 고정 (헤더 공간 80px 확보) */
         .main .block-container { 
-            padding-top: 75px !important; 
+            padding-top: 80px !important; 
+            padding-bottom: 30px !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
@@ -358,26 +384,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# [FIX] 고정형 프리미엄 헤더 바 (최상단 고정 보장)
-st.markdown("""
-    <div style='
-        position: fixed; 
-        top: 0; 
-        left: 0; 
-        right: 0; 
-        background-color: #f97316; 
-        color: white; 
-        padding: 12px 20px; 
-        z-index: 99999; 
-        display: flex; 
-        align-items: center; 
-        gap: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    '>
-        <span style='font-size: 1.2rem;'>🤖</span>
-        <span style='font-weight: 700; font-size: 1rem;'>CLIP 챗봇 도우미</span>
-    </div>
-""", unsafe_allow_html=True)
+# [삭제된 이전 위치의 헤더 코드]
 
 # [수정] 테마 대응형 슬림 선택기
 search_mode = st.radio(
