@@ -51,10 +51,10 @@ st.markdown("""
             pointer-events: none !important;
         }
         
-        /* (3) 메인 배포 컨테이너 여백 (상단 수치 보정 - 헤더 당기기 대응) */
+        /* (3) 메인 컨테이너 여백 (입력창 보호 및 푸터 밀어내기) */
         .main .block-container { 
-            padding-top: 55px !important; 
-            padding-bottom: 50px !important;
+            padding-top: 0 !important; 
+            padding-bottom: 100px !important; /* 푸터가 입력창 위로 올라오지 못하게 충분한 공간 확보 */
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
