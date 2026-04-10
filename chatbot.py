@@ -28,16 +28,17 @@ st.set_page_config(page_title="CLIP Report 5.0 AI 챗봇", page_icon="🤖")
 # CSS (크기 축소, 반투명 스크롤 버튼, 다크/라이트모드 충돌 해결, 푸터 제거 등 모두 포함)
 st.markdown("""
     <style>
-        /* 1. 전체 문서 가로 스크롤 완전 차단 */
+        /* 1. 전체 문서 가로 스크롤 완전 차단 및 기본 폰트 축소 */
         html, body {
             overflow-x: hidden !important;
             width: 100vw !important;
             margin: 0 !important;
             padding: 0 !important;
             scroll-behavior: smooth;
+            font-size: 13px !important; /* 전체적으로 2포인트 축소 */
         }
 
-        /* 2. 스트림릿 기본 요소 강제 숨김 (더 강력한 선택자) */
+        /* 2. 스트림릿 기본 요소 강제 숨김 */
         header, footer, [data-testid="stHeader"], [data-testid="stFooter"], .stAppHeader, .stAppFooter { 
             visibility: hidden !important; 
             display: none !important; 
@@ -46,64 +47,86 @@ st.markdown("""
         
         /* 3. 메인 배포 컨테이너 여백 고정 (헤더 공간 확보) */
         .main .block-container { 
-            padding-top: 80px !important; /* 헤더 높이만큼 확실히 띄움 */
+            padding-top: 75px !important; 
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
         }
 
-        /* 4. 채팅 영역 가로 스크롤 방지 및 줄바꿈 강제 */
-        .stChatMessage, .stMarkdown {
-            width: 100% !important;
-            max-width: 100% !important;
-            overflow-wrap: anywhere !important; /* 어떤 긴 문자열도 강제 줄바꿈 */
+        /* 4. 채팅 영역 및 마크다운 폰트 크기 고정 */
+        .stMarkdown, .stChatMessage, .stChatMessage p, .stMarkdown p, .stMarkdown li {
+            font-size: 13px !important;
+            line-height: 1.5 !important;
+            overflow-wrap: anywhere !important;
             word-wrap: break-word !important;
         }
         
-        /* 코드 블록(Pre) 가로 넘침 방지 */
         pre, code {
+            font-size: 12px !important; /* 코드는 조금 더 작게 */
             white-space: pre-wrap !important;
             word-wrap: break-word !important;
-            overflow-x: hidden !important;
         }
 
-        /* 5. 제품 선택 카드 디자인 및 위치 */
+        /* 5. [복구] 슬림 카드 선택기 디자인 */
         div[data-testid="stRadio"] {
             background-color: var(--secondary-background-color);
             border-radius: 12px;
-            padding: 12px 16px !important;
+            padding: 8px 12px !important; /* 두께 얇게 */
             border: 1px solid rgba(128, 128, 128, 0.1);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            margin: 10px 0 20px 0 !important;
+            margin: 5px 0 15px 0 !important;
         }
 
+        /* 라디오 버튼 제목 */
+        div[data-testid="stRadio"] > label {
+            font-size: 0.8rem !important;
+            font-weight: 600 !important;
+            margin-bottom: 8px !important;
+            opacity: 0.8;
+        }
+
+        /* 버튼 그룹 컨테이너 (한 줄 나열 고정) */
         div[data-testid="stRadio"] div[role="radiogroup"] {
-            gap: 12px !important;
+            gap: 8px !important;
             display: flex;
             flex-direction: row;
+            flex-wrap: nowrap !important; /* 절대 줄바꿈 금지 */
         }
 
+        /* 기본 라디오 원형 아이콘 숨기기 */
         div[data-testid="stRadio"] div[role="radiogroup"] [data-testid="stWidgetSelectionControl"] {
             display: none !important;
         }
 
+        /* 개별 버튼(칩) 슬림 스타일 */
         div[data-testid="stRadio"] div[role="radiogroup"] label {
             background-color: rgba(128, 128, 128, 0.08) !important;
-            padding: 8px 12px !important;
-            border-radius: 10px !important;
+            padding: 5px 10px !important; /* 얇게 조정 */
+            border-radius: 8px !important;
             flex: 1;
             display: flex;
             justify-content: center;
+            align-items: center;
             cursor: pointer !important;
+            min-width: 85px !important; /* 최소폭 확보하여 텍스트 보호 */
+            white-space: nowrap !important; /* 텍스트 개행 방지 */
+            border: 1px solid transparent !important;
         }
 
+        /* 선택된 버튼 스타일 */
         div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
             background-color: var(--background-color) !important;
-            border: 2px solid #f97316 !important;
+            border: 1.5px solid #f97316 !important;
             color: #f97316 !important;
             font-weight: 700 !important;
+            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.15) !important;
         }
-    </style>
+
+        div[data-testid="stRadio"] div[role="radiogroup"] label p {
+            font-size: 0.8rem !important;
+            margin: 0 !important;
+            white-space: nowrap !important;
+        }
     </style>
 
 """, unsafe_allow_html=True)
