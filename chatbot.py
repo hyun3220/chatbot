@@ -88,57 +88,88 @@ if is_dark:
         }}
     """
 else:
-    theme_css = f"""
-        :root, [data-testid="stApp"] {{
+    theme_css = """
+        /* ===== LIGHT MODE ===== */
+        :root, [data-testid="stApp"] {
             color-scheme: light;
-        }}
-        html, body, [data-testid="stApp"],
-        [data-testid="stAppViewContainer"], .main {{
+        }
+
+        /* (A) 앱 전체 배경 */
+        html, body,
+        html body [data-testid="stApp"],
+        html body [data-testid="stAppViewContainer"],
+        html body .main,
+        html body section.main {
             background-color: #FFFFFF !important;
+        }
+
+        /* (B) 채팅 메시지 배경 */
+        html body [data-testid="stChatMessage"] {
+            background-color: #F8F9FA !important;
+        }
+
+        /* (C) 텍스트: p 요소만 타겟 (div/label X -> 레이아웃 및 라디오 보호) */
+        .stMarkdown p,
+        [data-testid="stChatMessageContent"] p,
+        [data-testid="stChatMessageContent"] small {
             color: #31333F !important;
-        }}
-        /* 보조 배경 (카드 등) */
-        [data-testid="stSidebar"],
-        [data-testid="stChatMessage"],
-        div[data-testid="stRadio"] {{
+        }
+
+        /* (D) 라디오 카드 배경 */
+        html body div[data-testid="stRadio"] {
             background-color: #F0F2F6 !important;
-        }}
-        /* 텍스트 전체 */
-        p, span, label, div, h1, h2, h3, h4, h5, h6,
-        .stMarkdown, .stMarkdown * {{
+        }
+        /* 라디오 버튼 레이블 텍스트만 타겟 */
+        div[data-testid="stRadio"] div[role="radiogroup"] label p {
             color: #31333F !important;
-        }}
-        /* ★ 하단 입력바: 와일드카드로 stBottom 내 모든 요소 강제 동화 */
-        [data-testid="stBottom"],
-        [data-testid="stBottom"] *,
-        .stChatFloatingInputContainer,
-        .stChatFloatingInputContainer *,
-        [data-testid="stChatInputContainer"],
-        [data-testid="stChatInputContainer"] *,
-        [data-baseweb="base-input"],
-        [data-baseweb="base-input"] * {{
-            background-color: #FFFFFF !important;
-            color: #31333F !important;
-        }}
-        /* textarea 입력츘c을 더 구체적으로 */
-        [data-testid="stChatInput"] textarea,
-        .stChatInputContainer textarea {{
-            background-color: #F0F2F6 !important;
-            color: #31333F !important;
-            border: 1px solid rgba(0,0,0,0.15) !important;
-        }}
-        /* 라디오 버튼 */
-        input[type="radio"] {{
+        }
+        /* 선택 안 된 라디오 인디케이터 - 검은원 -> 회색 테두리 */
+        div[data-testid="stRadio"] div[role="radiogroup"] [data-testid="stWidgetSelectionControl"] span,
+        div[data-testid="stRadio"] div[role="radiogroup"] [data-testid="stWidgetSelectionControl"] div {
+            border-color: rgba(120,120,120,0.5) !important;
+            background-color: transparent !important;
+        }
+        input[type="radio"] {
             accent-color: #f97316 !important;
-        }}
-        /* 제출 버튼 */
-        [data-testid="stChatInputSubmitButton"] {{
+        }
+
+        /* (E) 하단 입력바: 고특이도 html body 선택자로 Streamlit CSS 제압 */
+        html body [data-testid="stBottom"] {
+            background-color: #FFFFFF !important;
+        }
+        html body [data-testid="stBottom"] > div {
+            background-color: #FFFFFF !important;
+        }
+        html body [data-testid="stBottom"] > div > div {
+            background-color: #FFFFFF !important;
+        }
+        html body [data-testid="stBottom"] > div > div > div {
+            background-color: #FFFFFF !important;
+        }
+        html body .stChatFloatingInputContainer,
+        html body .stChatFloatingInputContainer > div,
+        html body .stChatFloatingInputContainer > div > div {
+            background-color: #FFFFFF !important;
+        }
+
+        /* (F) 입력 textarea */
+        html body [data-testid="stChatInput"] textarea {
+            background-color: #F0F2F6 !important;
+            color: #31333F !important;
+            border: 1px solid rgba(0,0,0,0.12) !important;
+        }
+        html body [data-testid="stChatInput"] textarea::placeholder {
+            color: rgba(49,51,63,0.5) !important;
+        }
+
+        /* (G) 제출 버튼: 구조 건드리지 않고 색상만 */
+        html body [data-testid="stChatInputSubmitButton"] {
             background-color: #f97316 !important;
-        }}
-        [data-testid="stChatInputSubmitButton"] svg {{
+        }
+        html body [data-testid="stChatInputSubmitButton"] svg {
             fill: #FFFFFF !important;
             stroke: #FFFFFF !important;
-        }}
+        }
     """
 
 st.markdown(f"<style>{theme_css}</style>", unsafe_allow_html=True)
