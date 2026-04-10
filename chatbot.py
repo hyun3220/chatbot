@@ -89,13 +89,12 @@ if is_dark:
     """
 else:
     theme_css = """
-        /* ===== LIGHT MODE ===== */
+        /* ===== LIGHT MODE: 레이아웃 보존형 정밀 스타일링 ===== */
         :root, [data-testid="stApp"] {
             color-scheme: light;
         }
 
         /* (A) 앱 전체 배경 */
-        html, body,
         html body [data-testid="stApp"],
         html body [data-testid="stAppViewContainer"],
         html body .main,
@@ -108,22 +107,46 @@ else:
             background-color: #F8F9FA !important;
         }
 
-        /* (C) 텍스트: p 요소만 타겟 (div/label X -> 레이아웃 및 라디오 보호) */
+        /* (C) 채팅 텍스트 색상 (텍스트 전용 요소만 타겟) */
         .stMarkdown p,
         [data-testid="stChatMessageContent"] p,
-        [data-testid="stChatMessageContent"] small {
+        [data-testid="stChatMessageContent"] small,
+        [data-testid="stChatInput"] textarea,
+        [data-testid="stChatInput"] textarea::placeholder {
             color: #31333F !important;
         }
 
-        /* (D) 라디오 카드 배경 */
+        /* (D) 하단 입력바 영역: 배경만 흰색으로 덮어쓰기 (레이아웃 보호) */
+        html body [data-testid="stBottom"],
+        html body [data-testid="stBottom"] > div {
+            background-color: #FFFFFF !important;
+        }
+        
+        /* 입력창 내부: Streamlit 기본 쉐입 유지하며 색상만 변경 */
+        html body [data-testid="stChatInput"] textarea {
+            background-color: #F0F2F6 !important;
+            color: #31333F !important;
+            border: 1px solid rgba(0,0,0,0.1) !important;
+        }
+
+        /* 제출 버튼 아이콘 색상 보정 */
+        html body [data-testid="stChatInputSubmitButton"] {
+            background-color: #f97316 !important;
+        }
+        html body [data-testid="stChatInputSubmitButton"] svg {
+            fill: #FFFFFF !important;
+            stroke: #FFFFFF !important;
+        }
+
+        /* (E) 라디오 카드 배경 */
         html body div[data-testid="stRadio"] {
             background-color: #F0F2F6 !important;
         }
-        /* 라디오 버튼 레이블 텍스트만 타겟 */
+        /* 라디오 버튼 레이블 텍스트 */
         div[data-testid="stRadio"] div[role="radiogroup"] label p {
             color: #31333F !important;
         }
-        /* 선택 안 된 라디오 인디케이터 - 검은원 -> 회색 테두리 */
+        /* 미선택 라디오 인디케이터 (검은원 방지) */
         div[data-testid="stRadio"] div[role="radiogroup"] [data-testid="stWidgetSelectionControl"] span,
         div[data-testid="stRadio"] div[role="radiogroup"] [data-testid="stWidgetSelectionControl"] div {
             border-color: rgba(120,120,120,0.5) !important;
@@ -132,45 +155,8 @@ else:
         input[type="radio"] {
             accent-color: #f97316 !important;
         }
-
-        /* (E) 하단 입력바: 고특이도 html body 선택자로 Streamlit CSS 제압 */
-        html body [data-testid="stBottom"] {
-            background-color: #FFFFFF !important;
-        }
-        html body [data-testid="stBottom"] > div {
-            background-color: #FFFFFF !important;
-        }
-        html body [data-testid="stBottom"] > div > div {
-            background-color: #FFFFFF !important;
-        }
-        html body [data-testid="stBottom"] > div > div > div {
-            background-color: #FFFFFF !important;
-        }
-        html body .stChatFloatingInputContainer,
-        html body .stChatFloatingInputContainer > div,
-        html body .stChatFloatingInputContainer > div > div {
-            background-color: #FFFFFF !important;
-        }
-
-        /* (F) 입력 textarea */
-        html body [data-testid="stChatInput"] textarea {
-            background-color: #F0F2F6 !important;
-            color: #31333F !important;
-            border: 1px solid rgba(0,0,0,0.12) !important;
-        }
-        html body [data-testid="stChatInput"] textarea::placeholder {
-            color: rgba(49,51,63,0.5) !important;
-        }
-
-        /* (G) 제출 버튼: 구조 건드리지 않고 색상만 */
-        html body [data-testid="stChatInputSubmitButton"] {
-            background-color: #f97316 !important;
-        }
-        html body [data-testid="stChatInputSubmitButton"] svg {
-            fill: #FFFFFF !important;
-            stroke: #FFFFFF !important;
-        }
     """
+
 
 st.markdown(f"<style>{theme_css}</style>", unsafe_allow_html=True)
 
