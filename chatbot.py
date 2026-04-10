@@ -48,9 +48,9 @@ st.markdown("""
             pointer-events: none !important;
         }
         
-        /* (3) 메인 배포 컨테이너 여백 (외부 헤더 -48px 당기기 보정값: 55px) */
+        /* (3) 메인 배포 컨테이너 여백 (외부 헤더 -48px 당기기 보정값: 50px) */
         .main .block-container { 
-            padding-top: 55px !important; 
+            padding-top: 50px !important; 
             padding-bottom: 30px !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
