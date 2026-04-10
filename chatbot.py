@@ -50,10 +50,10 @@ st.markdown("""
             pointer-events: none !important;
         }
         
-        /* (3) 메인 배포 컨테이너 여백 (상단/하단 여백 최소화) */
+        /* (3) 메인 배포 컨테이너 여백 (상단 수치 보정) */
         .main .block-container { 
-            padding-top: 0 !important; 
-            padding-bottom: 50px !important;
+            padding-top: 50px !important; 
+            padding-bottom: 30px !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
