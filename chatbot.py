@@ -128,7 +128,7 @@ with st.sidebar:
     st.markdown("<h2 style='text-align: center;'>📎 CLIP Report 5.0 AI</h2>", unsafe_allow_html=True)
     st.markdown("<hr style='margin: 10px 0px; opacity: 0.2;'>", unsafe_allow_html=True)
     st.header("⚙️ 설정 및 정보")
-    st.write("CLIP Report 5.0 및 eForm 5.0 매뉴얼 기반 지능형 챗봇입니다@st.cache_resource
+    st.write(CLIP Report 5.0 및 eForm 5.0 매뉴얼 기반 지능형 챗봇입니다@st.cache_resource
 def get_retriever(API_KEY):
     # 기존기억을 지우고 분류된 데이터를 저장하기 위해 새 버전(v5) 폴더 사용
     CHROMA_PERSIST_DIR = "./chroma_db_v5"
