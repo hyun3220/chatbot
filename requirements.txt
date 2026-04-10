@@ -11,4 +11,4 @@ pypdf
 sentence-transformers
 beautifulsoup4
 pydantic>=2.0
-rank_bm25
+rank-bm25
