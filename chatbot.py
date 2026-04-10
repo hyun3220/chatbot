@@ -115,11 +115,7 @@ st.markdown("""
             }
         }
     </style>
-    
-    /*<div class="scroll-container">
-        <a href="#top-anchor" class="scroll-link" title="맨 위로">▲</a>
-        <a href="#bottom-anchor" class="scroll-link" title="맨 아래로">▼</a>
-    </div>*/
+
 """, unsafe_allow_html=True)
 
 # 스크롤 버튼 끝 
